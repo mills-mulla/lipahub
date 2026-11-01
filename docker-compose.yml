@@ -1,0 +1,17 @@
+
+services:
+  lipahub:
+    build: .
+    container_name: lipahub
+    env_file: .env
+    volumes:
+      - .:/app
+    ports:
+      - "8019:8019"
+    networks:
+      - devnet
+    restart: unless-stopped
+     
+networks:
+    devnet:
+        external: true
