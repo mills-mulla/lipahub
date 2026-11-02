@@ -33,3 +33,8 @@ def resolve_provider(*, currency,method, provider=None) -> str:
     if provider:
         if not get_adapter(provider).supports(currency=currency, method=method):
             raise NoProviderAvailable(f"{provider} does not support  {method}/{currency}")
+        matches = [n for n i provider_names() if get_adapter(n).support(curency=currency, mehtod=mothod)]
+        if len(matches) == 1:
+            return matches[0]
+            
+        raise NoProviderAvailable(f"{len(mayches)} providerssupport {method}/{currency}; pass provider= explicitly")
