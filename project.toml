@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lipahub"
+version = "0.1.0"
+description = "Plug and Play unified payment for Django Mpesa,Airtelmoney and cards"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+dependancies = ["Django>=5.0,<5.3"]
+
+[project.optional-dependancies]
+celery = ["celery>=5.3"]
+dev = ["pytest>8", "pytest-django>=4.8", "psycopg[binary]>=3.1"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "."]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+testpaths = ["test"]
