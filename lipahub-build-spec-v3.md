@@ -498,7 +498,7 @@ Not reviewed in this audit (do not attach unless asked): `querycheckout.py`, `ha
  |  PaymentService |----->| Provider registry|              |
  |  state machine  |      +---------+--------+              |
  |  idempotency    |                | adapters:             |
- +--------+--------+      daraja | airtel | card | tkash | fake
+ +--------+--------+      daraja | airtel | card | tkash(not available) | fake(testing only)
           |                                                 |
  +--------v--------+   verify source -> store raw event -> process_event
  | Webhook receiver|-------------------------------------> apply transition

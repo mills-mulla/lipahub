@@ -8,7 +8,7 @@ def reset():
     _instance.clear()
 
 def register(name, adapter):
-    """Inject adapteR instance """
+    """Inject adapter instance """
     _instance[name] = adapter
 
 def Provider_names():
