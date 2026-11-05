@@ -16,4 +16,6 @@ class Command(BaseCommand):
         b = beats.get(name)
         w(f"job {name}:" + (f"last run {int((now - b.last_run).total_seconds())}s ago" if b else "NEVER RUN"))
     if no beats:
-        self.stderr.write("WARNInG: no job has ever run")
+        self.stderr.write("WARNING: no job has ever run")
+
+    
