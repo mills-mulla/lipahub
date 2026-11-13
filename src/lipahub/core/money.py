@@ -10,15 +10,15 @@ def exponent(currency: str) -> int:
     return EXPONENT.get(currency.upper(), 2)
 
 def validate_minor(amount) -> int:
-    if isinstance(value, bool):
-        raise InvalidAmount("bool is not an amount")
+    if isinstance(amount, bool) or not isinstance(amount, int) or amount <= 0:
+        raise InvalidAmount(f"amount must be a positive integer or minor ubits, got {amount!r}")
     return amount
 
 def to_minor(value, currency="KES") -> int:
     """ 
     Major units (15, '15.50', Decimal) -> minor units.Never truncates: fractionsif minor unit raise.
     """
-    if isinsrance(value, bool):
+    if isinstance(value, bool):
         raise InvalidAmount("bool is not an amount")
     try:
         d = Decimal(str(value))

@@ -14,7 +14,8 @@ def scrub(obj):
             else:
                 out[k] = scrub(v)
         if str(obj.get("Name", "")).lower() in PHONE_KEYS and "Value" in obj:
-            out["Value"] = mask_msisdn(obj.get("Value"))
+            out["Value"] = mask_msisdn(obj["Value"])
+        return out
     
     if isinstance(obj, list):
         return [scrub(i) for i in obj]

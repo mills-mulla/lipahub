@@ -35,7 +35,7 @@ def is_late_success(old, new) -> bool:
     return Status(old) in LATE_SUCCESS_FROM and Status(new) == S.SUCCEEDED
 
 def can_transition(old, new) -> bool:
-        return Status(new) in TRANSISTIONS[Status(old)]
+        return Status(new) in TRANSITIONS[Status(old)]
 
 def check_transition(old, new, *, verified=False) -> bool:
     """Raises IllegalTransition if the transition is not allowed.Return true when it is a late success"""

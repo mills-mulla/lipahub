@@ -1,6 +1,6 @@
 import re
 
-from .error import InvalidPhoneNumber
+from .errors import InvalidPhoneNumber
 
 def normalize_msisdn(raw, default_country="254") -> str:
     s = re.sub(r"[\s\-()]", "", str(raw or ""))

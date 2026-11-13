@@ -5,7 +5,7 @@ import logging
 import uuid
 from datetime import timedelta
 
-from django.db import integrityError, transaction
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from . import outbox, registry
@@ -50,7 +50,7 @@ def callback_url(provider, correlation_id) -> str:
 
 def _payment_data(p: Payment) -> PaymentData:
     return PaymentData(
-        id=str(p.pk), provider=p.provider, method-p.method, amount=p,amount, currency-p.currency,
+        id=str(p.pk), provider=p.provider, method=p.method, amount=p.amount, currency=p.currency,
         kind=p.kind, msisdn=p.msisdn, reference=p.reference, correlation_id=str(p.correlation_id),
         provider_ref=p.provider_ref, description=p.description, metadata=dict(p.metadata or{}),
         callback_url=callback_url(p.provider, p.correlation_id) if p.kind == "outbound" else "",
@@ -185,7 +185,7 @@ def transition(
 
 def _safe_transition(pk, new_status, **kw):
     try:
-        return transition(pk, new_status, **kw):
+        return transition(pk, new_status, **kw)
     except IllegalTransition:
         return None
 
@@ -354,7 +354,7 @@ def expire_payment(pk) -> str:
         return "flagged"
     if p.provider_ref:
         result = poll_payment(pk)
-        if result in "transitioned", "flagged", "unavailable":
+        if result in( "transitioned", "flagged", "unavailable"):
             return result
 
     _safe_transition(pk, S.EXPIRED, source="expiry", failure_code=FailureCode.TIMEOUT, failure_message="expired without confirmation",
@@ -372,7 +372,7 @@ def reap_created(pk) -> str:
         _safe_transition(pk, S.FAILED, source="reap", failure_code=FailureCode.NOT_SENT, failure_message="payment was never sent to the provider")
         return "failed_not_sent"
 
-    _safe_transition(pk, S.PENDING, source"reaper", need_review="outcome_unknown")
+    _safe_transition(pk, S.PENDING, source="reaper", need_review="outcome_unknown")
     return "pending_unknown"
 
 #----- refunds -----------------------------

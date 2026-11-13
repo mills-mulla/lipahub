@@ -15,7 +15,7 @@ class FakeAdapter(BaseAdapter):
         super().__init__(config, http)
         self.capabilities = Capabilities(status_query=True, refunds=False, inbound=True, list_transactions=True)
         self.initiate_mode = "ok"
-        self.default_status = outcome.PENDING
+        self.default_status = Outcome.PENDING
         self.statuses = {}
         self.inbound = []
         self.initiate_calls, self.query_calls = [], []
@@ -39,8 +39,8 @@ class FakeAdapter(BaseAdapter):
             outcome=self.default_status, provider_ref=payment.provider_ref
         )
 
-    def parse webhook(self, headers, body, token):
-        self.verify_source(header, token)
+    def parse_webhook(self, headers, body, token):
+        self.verify_source(headers, token)
         d = self.load_json(body)
         return ProviderEvent(
             provider="fake", dedupe_key=str(d["event_id"]), outcome=Outcome(d["outcome"]), correlation_id=d.get("correlation_id"),

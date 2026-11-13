@@ -11,7 +11,7 @@ from ...core.errors import (
 )
 
 from ...core.money import to_minor, whole_units
-from ...core.phone import noramalize_msisdn
+from ...core.phone import normalize_msisdn
 from ...core.types import (
     Capabilities, FailureCode, InboundEvent, InitiateResult,Outcome,ProviderEvent, StatusResult,
 )
@@ -20,7 +20,7 @@ from .codes import map_result
 
 class DarajaAdapter(BaseAdapter):
     name = "daraja"
-    BASES = {"sandbox":"https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest", "production":""}
+    BASES = {"sandbox":"https://sandbox.safaricom.co.ke", "production":"https://api.safaricom.co.ke"}
 
     def __init__(self, config=None, http=None, cache=None, clock=time.time):
         super().__init__(config, http)
@@ -30,14 +30,14 @@ class DarajaAdapter(BaseAdapter):
         self.base = self.BASES[self.env]
         self.cache = cache if cache is not None else default_cache()
         self.clock = clock
-        self.capabilities = Capabilities(ststus_query=True, refunds=False, inbound=True, list_transactions= False)
+        self.capabilities = Capabilities(status_query=True, refunds=False, inbound=True, list_transactions= False)
 
     def supports(self, *, currency, method) -> bool:
         return currency.upper() == "KES" and method == "mobile_money"
 
     def _token(self):
         ck, cs = self.config.get("consumer_key", ""), self.config.get("consumer_secret", "")
-        key = f"lipahub:daraja:token:{swlf.env}:{ck[-6:]}"
+        key = f"lipahub:daraja:token:{self.env}:{ck[-6:]}"
         tok = self.cache.get(key)
 
         if tok:
@@ -49,16 +49,16 @@ class DarajaAdapter(BaseAdapter):
         data = r.json()
         if r.status != 200 or "access_token" not in data:
             raise ProviderRejected(f"daraja auth failed: {data}")
-        self.cache.set(key, data["access_token", max(int(data.get("expires_in", 3599)) - 300, 30)])
+        self.cache.set(key, data["access_token"], max(int(data.get("expires_in", 3599)) - 300, 30))
         return data["access_token"]
     
     def _post(self, path, payload):
         return self.http.request("POST", self.base + path, headers={"Authorization": f"Bearer {self._token()}"}, json_body=payload)
     
     def _stamp_password(self):
-        ts = time.strtime("%Y%m%d%H%M%S", time.gmtime(self.clock() + 3 * 3600))
-        raw = f"{self.config.get('short_code', '')}{self.config.get('passkey', '')}{ts}"
-        return ts, base64.b64
+        ts = time.strftime("%Y%m%d%H%M%S", time.gmtime(self.clock() + 3 * 3600))
+        raw = f"{self.config.get('shortcode', '')}{self.config.get('passkey', '')}{ts}"
+        return ts, base64.b64encode(raw.encode()).decode()
 
     # ----------------- protocol --------------------
     def initiate(self, payment):
@@ -70,7 +70,7 @@ class DarajaAdapter(BaseAdapter):
             raise ProviderRejected("MSISDN required", FailureCode.INVALID_NUMBER)
         phone = normalize_msisdn(payment.msisdn).lstrip("+")
         ts, pw = self._stamp_password()
-        shortcode = self.config.get("shortcode". "")
+        shortcode = self.config.get("shortcode", "")
         r = self._post("/mpesa/stkpush/v1/processrequest",{
             "BusinessShortCode": shortcode,
             "Password": pw,
@@ -82,7 +82,7 @@ class DarajaAdapter(BaseAdapter):
             "PhoneNumber": phone,
             "CallBackURL": payment.callback_url,
             "AccountReference": (payment.reference or payment.id)[:12],
-            "TransactionDesc": (payment.description or "Payment"),[:13]
+            "TransactionDesc": (payment.description or "Payment")[:13]
         })
         data = r.json()
         if r.status >= 500:
@@ -95,21 +95,21 @@ class DarajaAdapter(BaseAdapter):
     def query_status(self, payment):
         if not payment.provider_ref:
             raise ProviderUnavailable("no CheckoutRequestID yet")
-        ts, pw = self._stamped_password()
+        ts, pw = self._stamp_password()
         r = self._post("/mpesa/stkpushquery/v1/query",{
             "BusinessShortCode": self.config.get("short_code", ""),
             "Password": pw,
             "Timestamp": ts,
-            "CheckoutRequestID": payment.provider_ref"
+            "CheckoutRequestID": payment.provider_ref,
         })
         if "being processed" in r.text.lower():
-            return StatusResult(outcome=Outcome.PENDING, provider_ref=payment.Provider_ref)
+            return StatusResult(outcome=Outcome.PENDING, provider_ref=payment.provider_ref)
             
         data = r.json()
         code = str (data.get("ResultCode", ""))
-        if r.statsus != 200 or code == "" or str(data.get("ResponseCode", "0")) != "0":
+        if r.status != 200 or code == "" or str(data.get("ResponseCode", "0")) != "0":
             raise ProviderUnavailable(f"daraja query { r.status}", data)
-        outcome, fcode desc = map_result(code)
+        outcome, fcode, desc = map_result(code)
 
         return StatusResult(outcome=outcome, provider_ref=payment.provider_ref, failure_code=fcode, failure_message=data.get("ResultDesc") or desc, raw=data)
 
@@ -119,15 +119,15 @@ class DarajaAdapter(BaseAdapter):
         data = self.load_json(body)
         try:
             cb = data["Body"]["stkCallback"]
-            checkout, code = cb["ChekoutRequestID"], str(cb["ResultCode"])
-            items = {i["Name"]: i.get("Value") for i in (cb.get("CallbackMetadata") or {}).get(("Item",[]))}
-            amount = to_minor(Decimal(str(items["Amount"])), "KES") if "Amount" in items else None
+            checkout, code = cb["CheckoutRequestID"], str(cb["ResultCode"])
+            items = {i["Name"]: i.get("Value") for i in (cb.get("CallbackMetadata") or {}).get("Item",[])}
+            amount = to_minor(Decimal(str(items["Amount"])), "KES") if "Amount" in items and code == "0" else None
         except (KeyError, TypeError, ValueError, InvalidAmount):
-            rasie InvalidWebhook("malformed stkCallback", 400)
+            raise InvalidWebhook("malformed stkCallback", 400)
         outcome, fcode, desc = map_result(code)
         return ProviderEvent(
-            provider=self.name, dedupe_key=f"{checkout}:{code}", outcome, provider_ref=checkout, amount=amount,
-            failure_code=fcode, failure_message=cb.get("ResultDesc") or desc, receipt=str(items.get("MpesaReceiptNumber")),
+            provider=self.name, dedupe_key=f"{checkout}:{code}", outcome=outcome, provider_ref=checkout, amount=amount,
+            failure_code=fcode, failure_message=cb.get("ResultDesc") or desc, receipt=str(items.get("MpesaRecieptNumber")),
             raw=data,
         )
 

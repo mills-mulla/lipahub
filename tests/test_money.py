@@ -2,10 +2,10 @@ from decimal import Decimal
 
 import pytest
 
-from  lipahub.core.errors import InvalidAmount, InvalidPhoneNumber
-from  lipahub.core.money import to_major, to_minor, validate_minor, whone_units
-from  lipahub.core.phone import mask_msisdn, normalize_msisdn
-from  lipahub.core.redact import scrub
+from  src.lipahub.core.errors import InvalidAmount, InvalidPhoneNumber
+from  src.lipahub.core.money import to_major, to_minor, validate_minor, whole_units
+from  src.lipahub.core.phone import mask_msisdn, normalize_msisdn
+from  src.lipahub.core.redact import scrub
 
 def test_to_minor():
     assert to_minor(15) == 1500 and to_minor("15.50") == 1550 and to_minor(Decimal("0.01")) == 1
@@ -45,7 +45,7 @@ def test_bad_phone():
 
 def test_mask_and_scrub():
     assert mask_msisdn("+254700123456") == "+2547*****456"
-    out = scrub({"MSISDN": "25400123456", "Item":[{"Name": "PhoneNumber", "Value": 254700123456}, {"Name": "Amount", "Value", 1}]})
+    out = scrub({"MSISDN": "254700123456", "Item":[{"Name": "PhoneNumber", "Value": 254700123456}, {"Name": "Amount", "Value": 1}]})
     assert "700123" not in str(out) and out["Item"][1]["Value"] == 1
 
 

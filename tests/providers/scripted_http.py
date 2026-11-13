@@ -1,5 +1,5 @@
-from lipahub.core.errors import ProviderUnavailable
-from lipahub.providers.http import HttpResponse
+from src.lipahub.core.errors import ProviderUnavailable
+from src.lipahub.providers.http import HttpResponse
 import json
 
 class ScriptedHttp:
@@ -18,7 +18,9 @@ class ScriptedHttp:
         return self
     
     def request(self, method, url, *, headers=None, json_body=None, params=None):
-        self.calls.append({"method": method, "url": url, "headers": headers or {}, "json": json_body, params})
+        self.calls.append({"method": method, "url": url, "headers": headers or {}, "json": json_body, "params": params})
+        if not self.queue:
+            raise AssertionError(f"unexpected request no response  queued")
         item = self.queue.pop(0)
         if  isinstance(item, Exception):
             raise item

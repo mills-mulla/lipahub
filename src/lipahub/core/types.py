@@ -3,18 +3,29 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
+
 class Outcome(str, Enum):
     SUCCEEDED = "succeeded"
     FAILED = "failed"
     PENDING = "pending"
     CANCELED = "canceled"
 
-class FailiureCode:
-    CANCELLED_BY_USER = "cancelled_by_user"
+@dataclass(frozen=True)
+class StatusResult:
+    outcome: Outcome
+    amount: Optional[int] = None
+    provider_ref: Optional[str] = None
+    failure_code: str = ""
+    failure_message: str = ""
+    receipt: str = ""
+    raw: dict = field(default_factory=dict)
+    
+class FailureCode:
+    CANCELED_BY_USER = "canceled_by_user"
     INSUFFICIENT_FUNDS = "insufficient_funds"
     TIMEOUT = "timeout"
     WRONG_PIN = "wrong_pin"
-    INVALID_AMMOUNT = "invalid_amount"
+    INVALID_AMOUNT = "invalid_amount"
     INVALID_NUMBER = "invalid_number"   
     PROVIDER_ERROR = "provider_error"
     NOT_SENT = "not_sent"

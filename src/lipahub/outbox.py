@@ -3,7 +3,7 @@ import logging
 from django.db import transaction
 from django.utils import timezone
 
-from . import signals
+from . import signal
 from .models import Outbox, Payment
 
 from settings import get
@@ -11,12 +11,12 @@ from settings import get
 log = logging.getLogger("lipahub")
 
 SIGNAL_FOR = {
-    "payment_succeeded": signals.payment_succeeded,
-    "payment_failed": signals.payment_failed,
-    "payment_late_success": signals.payment_late_success,
-    "payment_flagged": signals.payment_flagged,
-    "payment_refunded": signals.payment_refunded,
-    "inbound_payment_received": signals.inbound_payment_recieved,
+    "payment_succeeded": signal.payment_succeeded,
+    "payment_failed": signal.payment_failed,
+    "payment_late_success": signal.payment_late_success,
+    "payment_flagged": signal.payment_flagged,
+    "payment_refunded": signal.payment_refunded,
+    "inbound_payment_received": signal.inbound_payment_recieved,
 }
 
 def enqueue(payment, kind, payload=None):
@@ -25,7 +25,7 @@ def enqueue(payment, kind, payload=None):
 
 def dispatch(batch=100) -> int:
     """Emit signals for undelivered rows (at-least-once).Returns the  number delivered """
-    max_attempts = get("OUTBOX_MAX_ATTEMPTS
+    max_attempts = get("OUTBOX_MAX_ATTEMPTS")
     ids = list (
         Outbox.objects.filter(dispatched_at__isnull=True, attempts__lt=max_attempts)
         .order_by("id").values_list("pk", flat=True)[:batch]
@@ -43,7 +43,7 @@ def dispatch(batch=100) -> int:
                 errors = []
                 sig = SIGNAL_FOR.get(row.kind)
                 if sig is not None:
-                    results = sig.send_robust(sender=Payment, payment=row.payment, pay;oad=row.payload, outbound_id=row.pk)
+                    results = sig.send_robust(sender=Payment, payment=row.payment, payload=row.payload, outbound_id=row.pk)
                     errors = [repr(r) for _, r in results if isinstance(r, Exception)]
 
                 row.attempts += 1

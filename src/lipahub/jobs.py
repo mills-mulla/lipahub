@@ -52,7 +52,7 @@ def expire_stale():
     pks = Payment.objects.filter(
         status="pending",
         expires_at__lt=timezone.now(),
-    ).values_list("pk", flat=True)[:200])
+    ).values_list("pk", flat=True)[:200]
 
     return _each("expire_stale", list(pks), service.expire_payment)
 

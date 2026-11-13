@@ -14,15 +14,15 @@ class Payment(models.Model):
     amount = models.PositiveBigIntegerField()
     currency = models.CharField(max_length=3, default="KES")
     status = models.CharField(max_length=20, default="created")
-    need_review = models.CharField(max_lenth=40, null=True, blank=True)
+    need_review = models.CharField(max_length=40, null=True, blank=True)
     correlation_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     provider_ref = models.CharField(max_length=100, null=True, blank=True)
     checkout_url = models.TextField( blank=True, default="")
     reference = models.CharField(max_length=100, blank=True, default="")
     description = models.CharField(max_length=100, blank=True, default="")
-    msisdn = models.CharField(max_lenth=20, null=True, blank=True)
+    msisdn = models.CharField(max_length=20, null=True, blank=True)
     metadata = models.JSONField(default=dict, blank=True)
-    failure_code = models.CharField(max_lenth=50, default="", blank=True)
+    failure_code = models.CharField(max_length=50, default="", blank=True)
     failure_message = models.TextField( blank=True, default="")
     initiated_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -32,24 +32,24 @@ class Payment(models.Model):
 
     class Meta:
         db_table = "lipahub_payment"
-        constraints ={
-            models.UniqueConstarint(
+        constraints = {
+            models.UniqueConstraint(
                 fields=["merchant_id", "idempotency_key"],
                 condition=Q(idempotency_key__isnull=False),
                 name="lp_uniq_merchant_idem",
             ),
-            models.UniqueConstarint(
+            models.UniqueConstraint(
                 fields=["provider", "provider_ref"],
                 condition=Q(provider_ref__isnull=False),
                 name="lp_uniq_provider_ref",
             ),
-            models.UniqueConstarint(
+            models.UniqueConstraint(
                 fields=["merchant_id", "reference"],
                 condition=Q(ststus__in=["created","pending"], kind="outbound") & ~Q(reference=""),
                 name="lp_uniq_open_reference",
             ),
         }
-        indexes = [models.Indexe(fields=["status", "created_at"], name="lp_status_created-idx")]
+        indexes = [models.Index(fields=["status", "created_at"], name="lp_status_created-idx")]
 
     def __str__(self):
         return f"{self.provider}:{self.id} {self.status}"

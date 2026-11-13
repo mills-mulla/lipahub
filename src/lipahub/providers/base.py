@@ -2,25 +2,25 @@ import hmac
 import json
 import time
 
-from ..core.errors import InvalidateWebhook, NotSupported
+from ..core.errors import InvalidWebhook, NotSupported
 from ..core.types import Capabilities
 from .http import HttpClient
 
 class MemoryCache:
-    def __init_(self):
+    def __init__(self):
         self._d = {}
 
     def get(self, key):
-        v = seld._d.get(key)
+        v = self._d.get(key)
         if v and v[1] > time.time():
             return v[0]
         return None
 
     def set(self, key, value, timeout):
-        self._d[key] = (value, time.time() + tomeout)
+        self._d[key] = (value, time.time() + timeout)
 
 def default_cache():
-    """ django cache when availablr"""
+    """ django cache when available"""
     try:
         from django.core.cache import cache
         return cache
@@ -34,7 +34,7 @@ class BaseAdapter:
 
     def __init__(self, config=None, http=None):
         self.config = dict(config or {})
-        self.http = http or HttpClient(self.config("timeout", 30))
+        self.http = http or HttpClient(self.config.get("timeout", 30))
         self.capabilities = Capabilities()
 
     def supports(self, *, currency, method) -> bool:
@@ -70,7 +70,7 @@ class BaseAdapter:
             raise InvalidWebhook("bad token", 403)
 
         allowed = self.config.get("allowed_ips") or []
-        if allowed and (header.get("x-lipahub-remote-addr") or "").strip() not in allowed:
+        if allowed and (headers.get("x-lipahub-remote-addr") or "").strip() not in allowed:
             raise InvalidWebhook("source not allowed", 403)
 
     @staticmethod
