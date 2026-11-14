@@ -2,9 +2,9 @@ from datetime import timedelta
 import pytest
 from django.utils import timezone
 
-from lipahub import jobs, service
-from lipahub.core.types import Outcome, StatusResult
-from lipahub.models import JobHeartbeat, Payment
+from src.lipahub import jobs, service
+from src.lipahub.core.types import Outcome, StatusResult
+from src.lipahub.models import JobHeartbeat, Payment
 
 pytestmark = pytest.mark.django_db
 
@@ -40,7 +40,7 @@ def test_expire_marks_expired_after_final_query(fake):
     Payment.objects.filter(pk=p.pk).update(expires_at=timezone.now() - timedelta(minutes=1))
     jobs.expire_stale()
     p.refresh_from_db()
-    assert p.status = "expired"
+    assert p.status == "expired"
 
 def test_expire_resolves_if_provider_says_succeeded(fake):
     p = pending(fake)
@@ -78,7 +78,7 @@ def test_jobs_are_idempotent(fake):
 
 
 def test_purge_raw_payloads(fake):
-    fake lipahub.models import Event
+    from src.lipahub.models import Event
     e = Event.objects.create(provide="fake", dedupe_key="x", raw_payload={"a":1})
     Event.objects.filter(pk=e.pk).update(recieved_at=timezone.now() - timedelta(days=90))
     jobs.purge_raw_payloads()

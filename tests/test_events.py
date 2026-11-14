@@ -1,7 +1,7 @@
 import pytest
-from lipahub import service
-from lipahub.core.types import InboundEvent, Outcome, ProviderEvent
-from lipahub.models import Event, Outbox, Payment
+from src.lipahub import service
+from src.lipahub.core.types import InboundEvent, Outcome, ProviderEvent
+from src.lipahub.models import Event, Outbox, Payment
 
 
 pytestmark = pytest.mark.django_db
@@ -63,7 +63,7 @@ def test_failure_event_then_late_success_is_flagged(fake):
     p = pending_payment(fake)
     service.ingest_event("fake", event(p, Outcome.FAILED, key="f", failure_code="timeout"))
     p.refresh_from_db()
-    assert p.status ="failed"
+    assert p.status == "failed"
     fake.default_status = Outcome.SUCCEEDED
     service.ingest_event("fake", event(p, key="s"))
     p.refresh_from_db()

@@ -32,23 +32,23 @@ class Payment(models.Model):
 
     class Meta:
         db_table = "lipahub_payment"
-        constraints = {
-            models.UniqueConstraint(
-                fields=["merchant_id", "idempotency_key"],
-                condition=Q(idempotency_key__isnull=False),
-                name="lp_uniq_merchant_idem",
-            ),
-            models.UniqueConstraint(
-                fields=["provider", "provider_ref"],
-                condition=Q(provider_ref__isnull=False),
-                name="lp_uniq_provider_ref",
-            ),
-            models.UniqueConstraint(
-                fields=["merchant_id", "reference"],
-                condition=Q(ststus__in=["created","pending"], kind="outbound") & ~Q(reference=""),
-                name="lp_uniq_open_reference",
-            ),
-        }
+        # constraints = {
+        #     models.UniqueConstraint(
+        #         fields=["merchant_id", "idempotency_key"],
+        #         condition=Q(idempotency_key__isnull=False),
+        #         name="lp_uniq_merchant_idem",
+        #     ),
+        #     models.UniqueConstraint(
+        #         fields=["provider", "provider_ref"],
+        #         condition=Q(provider_ref__isnull=False),
+        #         name="lp_uniq_provider_ref",
+        #     ),
+        #     models.UniqueConstraint(
+        #         fields=["merchant_id", "reference"],
+        #         condition=Q(ststus__in=["created","pending"], kind="outbound") & ~Q(reference=""),
+        #         name="lp_uniq_open_reference",
+        #     ),
+        # }
         indexes = [models.Index(fields=["status", "created_at"], name="lp_status_created-idx")]
 
     def __str__(self):

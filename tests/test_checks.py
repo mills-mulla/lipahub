@@ -1,5 +1,5 @@
 from django.test import override_settings
-from lipahub.checks import lipahub_checks
+from src.lipahub.checks import lipahub_checks
 
 
 def ids():
