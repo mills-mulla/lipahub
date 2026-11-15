@@ -45,7 +45,7 @@ class Payment(models.Model):
             ),
             models.UniqueConstraint(
                 fields=["merchant_id", "reference"],
-                condition=Q(ststus__in=["created","pending"], kind="outbound") & ~Q(reference=""),
+                condition=Q(status__in=["created","pending"], kind="outbound") & ~Q(reference=""),
                 name="lp_uniq_open_reference",
             ),
         ]

@@ -1,18 +1,18 @@
-from djangoutils.module_loading import  import_string
+from django.utils.module_loading import  import_string
 from .core.errors import ConfigurationError,NoProviderAvailable
 from .settings import  get
 
-_instance = {}
+_instances = {}
 
 def reset():
-    _instance.clear()
+    _instances.clear()
 
 def register(name, adapter):
     """Inject adapter instance """
-    _instance[name] = adapter
+    _instances[name] = adapter
 
-def Provider_names():
-    return list(get("PROVIDERS").keys()) or list(_instance.keys())
+def provider_names():
+    return list(get("PROVIDERS").keys()) or list(_instances.keys())
 
 def get_adapter(name):
     if name in _instances:
@@ -33,7 +33,7 @@ def resolve_provider(*, currency,method, provider=None) -> str:
     if provider:
         if not get_adapter(provider).supports(currency=currency, method=method):
             raise NoProviderAvailable(f"{provider} does not support  {method}/{currency}")
-        matches = [n for n i provider_names() if get_adapter(n).support(curency=currency, mehtod=mothod)]
+        matches = [n for n in provider_names() if get_adapter(n).supports(currency=currency, method=method)]
         if len(matches) == 1:
             return matches[0]
             

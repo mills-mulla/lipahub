@@ -6,7 +6,7 @@ from django.utils import timezone
 from . import signal
 from .models import Outbox, Payment
 
-from settings import get
+from .settings import get
 
 log = logging.getLogger("lipahub")
 
@@ -16,7 +16,7 @@ SIGNAL_FOR = {
     "payment_late_success": signal.payment_late_success,
     "payment_flagged": signal.payment_flagged,
     "payment_refunded": signal.payment_refunded,
-    "inbound_payment_received": signal.inbound_payment_recieved,
+    "inbound_payment_received": signal.inbound_payment_received,
 }
 
 def enqueue(payment, kind, payload=None):

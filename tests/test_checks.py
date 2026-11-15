@@ -21,5 +21,18 @@ def test_atommic_requests_warn():
     with override_settings(DATABASES=dbs):
         assert "lipahub.W002" in ids()
  
+def test_typo_in_setting_is_an_error():
+    with override_settings(LIPAHUB={"CALLBACK_TOKEM": "x"}):
+        assert "lipahub.E001" in ids()
+def test_bad_task_runner_is_an_error():
+    with override_settings(LIPAHUB={"TASK_RUNNER": "x"}):
+        assert "lipahub.E002" in ids()
+def test_provider_without_adapter_is_an_error():
+    with override_settings(LIPAHUB={"PROVIDERS": {"foo": {}}}):
+        assert "lipahub.E003" in ids()
+
+def test_valid_settings_have_no_errors():
+    from src.lipahub.settings import validate
+    assert [p for p in validate() if p[0] == "error"] == []
 
 

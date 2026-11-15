@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from django.utils import timezone
 
-from . import outbox, regidtry, service
+from . import outbox, registry, service
 from .core.errors import ProviderUnavailable, NotSupported
 from .models import Event, JobHeartbeat, Payment
 from .settings import get

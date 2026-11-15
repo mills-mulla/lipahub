@@ -2,7 +2,7 @@ import pytest
 
 from src.lipahub.core.errors import IdempotencyConflict, NoProviderAvailable
 from src.lipahub import service
-from src.lipahub.states import Status
+from src.lipahub.core.states import Status
 from src.lipahub.models import Outbox,Payment
 
 pytestmark = pytest.mark.django_db

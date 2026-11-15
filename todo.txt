@@ -1,0 +1,986 @@
+(.core) ➜  lipahub git:(master) ✗ python -m pytest --ds=tests.settings
+============================================================================ test session starts ============================================================================
+platform linux -- Python 3.13.5, pytest-9.2.0, pluggy-1.7.0
+django: version: 6.1.2, settings: tests.settings (from option)
+rootdir: /home/teralinkx/projects/lipahub
+plugins: django-4.14.0
+collected 115 items                                                                                                                                                         
+
+tests/test_events.py FFFFFFFFFF                                                                                                                                       [  8%]
+tests/test_jobs.py FFFFFFFF                                                                                                                                           [ 15%]
+tests/test_outbox.py FFF                                                                                                                                              [ 18%]
+tests/test_service.py FFFFFFFFF                                                                                                                                       [ 26%]
+tests/providers/test_airtel.py .............                                                                                                                          [ 37%]
+tests/providers/test_card.py .........                                                                                                                                [ 45%]
+tests/providers/test_daraja.py .....................                                                                                                                  [ 63%]
+tests/providers/test_fake.py .....                                                                                                                                    [ 67%]
+tests/test_checks.py ......FF                                                                                                                                         [ 74%]
+tests/test_money.py ..................                                                                                                                                [ 90%]
+tests/test_states.py ...........                                                                                                                                      [100%]
+
+================================================================================= FAILURES ==================================================================================
+_______________________________________________________ test_confirmed_success_transitions_once_and_replay_is_deduped _______________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c14d6120>
+
+    def test_confirmed_success_transitions_once_and_replay_is_deduped(fake):
+>       p = pending_payment(fake)
+            ^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_events.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_events.py:13: in pending_payment
+    service.initiate_payment(p.pk)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pk = UUID('04c83a22-d717-4566-bc5e-fc2abcd57ee3')
+
+    def initiate_payment(pk):
+        """
+        claim automatically so a retry can never send a second prompt
+        """
+>       claimed = Payment.objects.filter(
+                  ^^^^^^^
+            pk=pk, status=S.CREATED.value, initiated_at__isnull=True, kind="outbound"
+        ).update(initiated_at=timezone.now())
+E       UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+
+src/lipahub/service.py:126: UnboundLocalError
+____________________________________________________________ test_unconfirmed_success_waits_for_provider_staatus ____________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c157f610>
+
+    def test_unconfirmed_success_waits_for_provider_staatus(fake):
+>       p = pending_payment(fake)
+            ^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_events.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_events.py:13: in pending_payment
+    service.initiate_payment(p.pk)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pk = UUID('1e68ca1c-befa-4c4a-bbda-263216808ee0')
+
+    def initiate_payment(pk):
+        """
+        claim automatically so a retry can never send a second prompt
+        """
+>       claimed = Payment.objects.filter(
+                  ^^^^^^^
+            pk=pk, status=S.CREATED.value, initiated_at__isnull=True, kind="outbound"
+        ).update(initiated_at=timezone.now())
+E       UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+
+src/lipahub/service.py:126: UnboundLocalError
+____________________________________________________________ test_forged_success_that_provider_denies_is_flagged ____________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c15234d0>
+
+    def test_forged_success_that_provider_denies_is_flagged(fake):
+>       p = pending_payment(fake)
+            ^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_events.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_events.py:13: in pending_payment
+    service.initiate_payment(p.pk)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pk = UUID('f2687d24-e35f-4c15-8dc4-432b7f577ce9')
+
+    def initiate_payment(pk):
+        """
+        claim automatically so a retry can never send a second prompt
+        """
+>       claimed = Payment.objects.filter(
+                  ^^^^^^^
+            pk=pk, status=S.CREATED.value, initiated_at__isnull=True, kind="outbound"
+        ).update(initiated_at=timezone.now())
+E       UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+
+src/lipahub/service.py:126: UnboundLocalError
+__________________________________________________________________ test_amount_mismatch_never_transitions ___________________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c1512ea0>
+
+    def test_amount_mismatch_never_transitions(fake):
+>       p = pending_payment(fake)
+            ^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_events.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_events.py:13: in pending_payment
+    service.initiate_payment(p.pk)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pk = UUID('afb9c44b-ae14-4791-80f6-316fbf8e17ca')
+
+    def initiate_payment(pk):
+        """
+        claim automatically so a retry can never send a second prompt
+        """
+>       claimed = Payment.objects.filter(
+                  ^^^^^^^
+            pk=pk, status=S.CREATED.value, initiated_at__isnull=True, kind="outbound"
+        ).update(initiated_at=timezone.now())
+E       UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+
+src/lipahub/service.py:126: UnboundLocalError
+_______________________________________________________________ test_early_callback_before_pending_is_handled _______________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c1513bb0>
+
+    def test_early_callback_before_pending_is_handled(fake):
+        p = service.create_payment(initiate=False, amount=10000, provider="fake", msisdn="0700123456", merchant_id=1)
+        fake.default_status = Outcome.SUCCEEDED
+>       service.ingest_event("fake", ProviderEvent(provider="fake", dedupekey="e", outcome=Outcome.SUCCEEDED,
+                            correlation_id=str(p.correlation_id), provider_ref="X", amount=10000))
+E       TypeError: ProviderEvent.__init__() got an unexpected keyword argument 'dedupekey'. Did you mean 'dedupe_key'?
+
+tests/test_events.py:56: TypeError
+______________________________________________________________ test_failure_event_then_late_success_is_flagged ______________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c1591910>
+
+    def test_failure_event_then_late_success_is_flagged(fake):
+>       p = pending_payment(fake)
+            ^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_events.py:63: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_events.py:13: in pending_payment
+    service.initiate_payment(p.pk)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pk = UUID('b9ca5384-5449-4edb-af28-37e4f73e7b70')
+
+    def initiate_payment(pk):
+        """
+        claim automatically so a retry can never send a second prompt
+        """
+>       claimed = Payment.objects.filter(
+                  ^^^^^^^
+            pk=pk, status=S.CREATED.value, initiated_at__isnull=True, kind="outbound"
+        ).update(initiated_at=timezone.now())
+E       UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+
+src/lipahub/service.py:126: UnboundLocalError
+_______________________________________________________ test_success_event_for_unknown_payment_is_stored_not_dropped ________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c1527240>
+
+    def test_success_event_for_unknown_payment_is_stored_not_dropped(fake):
+>       service.ingest_inbound("fake", InboundEvent(provider="fake", dedupekey="z", outcome=Outcome.SUCCEEDED,
+        ^^^^^^^^^^^^^^^^^^^^^^
+                            correlation_id="1111111-11111-111111-1111111-111111111111", amount=1))
+E       AttributeError: module 'src.lipahub.service' has no attribute 'ingest_inbound'
+
+tests/test_events.py:75: AttributeError
+______________________________________________________________ test_inbound_matching_open_payment_completes_it ______________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c1526030>
+
+    def test_inbound_matching_open_payment_completes_it(fake):
+>       p = pending_payment(fake)
+            ^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_events.py:87: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_events.py:13: in pending_payment
+    service.initiate_payment(p.pk)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pk = UUID('ce6dc388-3025-4449-8db7-f2e0de0a6186')
+
+    def initiate_payment(pk):
+        """
+        claim automatically so a retry can never send a second prompt
+        """
+>       claimed = Payment.objects.filter(
+                  ^^^^^^^
+            pk=pk, status=S.CREATED.value, initiated_at__isnull=True, kind="outbound"
+        ).update(initiated_at=timezone.now())
+E       UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+
+src/lipahub/service.py:126: UnboundLocalError
+____________________________________________________________ test_phonenumbers_are_scrubbed_from_stored_payloads ____________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c153e350>
+
+    def test_phonenumbers_are_scrubbed_from_stored_payloads(fake):
+>       p = pending_payment(fake)
+            ^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_events.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_events.py:13: in pending_payment
+    service.initiate_payment(p.pk)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pk = UUID('08df9755-c6d5-477d-8595-af0d93a0abae')
+
+    def initiate_payment(pk):
+        """
+        claim automatically so a retry can never send a second prompt
+        """
+>       claimed = Payment.objects.filter(
+                  ^^^^^^^
+            pk=pk, status=S.CREATED.value, initiated_at__isnull=True, kind="outbound"
+        ).update(initiated_at=timezone.now())
+E       UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+
+src/lipahub/service.py:126: UnboundLocalError
+______________________________________________________________________________ testwebhookview ______________________________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c153d750>, client = <django.test.client.Client object at 0x7f16c1535f40>
+
+    def testwebhookview(fake, client):
+>       p = pending_payment(fake)
+            ^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_events.py:99: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_events.py:13: in pending_payment
+    service.initiate_payment(p.pk)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pk = UUID('9c218396-79c3-4a45-be2d-d64582f82d69')
+
+    def initiate_payment(pk):
+        """
+        claim automatically so a retry can never send a second prompt
+        """
+>       claimed = Payment.objects.filter(
+                  ^^^^^^^
+            pk=pk, status=S.CREATED.value, initiated_at__isnull=True, kind="outbound"
+        ).update(initiated_at=timezone.now())
+E       UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+
+src/lipahub/service.py:126: UnboundLocalError
+_______________________________________________________________ test_poll_pending_resolvers_a_missed_webhook ________________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c15356d0>
+
+    def test_poll_pending_resolvers_a_missed_webhook(fake):
+>       p = pending(fake)
+            ^^^^^^^^^^^^^
+
+tests/test_jobs.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_jobs.py:15: in pending
+    service.initiate_payment(p.pk)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pk = UUID('79e8a987-30d0-42f2-a00c-e8ea6dcfadc6')
+
+    def initiate_payment(pk):
+        """
+        claim automatically so a retry can never send a second prompt
+        """
+>       claimed = Payment.objects.filter(
+                  ^^^^^^^
+            pk=pk, status=S.CREATED.value, initiated_at__isnull=True, kind="outbound"
+        ).update(initiated_at=timezone.now())
+E       UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+
+src/lipahub/service.py:126: UnboundLocalError
+_______________________________________________________________________ test_poll_skips_fresh_payment _______________________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c1458140>
+
+    def test_poll_skips_fresh_payment(fake):
+>       p = pending(fake)
+            ^^^^^^^^^^^^^
+
+tests/test_jobs.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_jobs.py:15: in pending
+    service.initiate_payment(p.pk)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pk = UUID('ca99ec58-8c70-4f3b-bc6f-aa41ab0dae25')
+
+    def initiate_payment(pk):
+        """
+        claim automatically so a retry can never send a second prompt
+        """
+>       claimed = Payment.objects.filter(
+                  ^^^^^^^
+            pk=pk, status=S.CREATED.value, initiated_at__isnull=True, kind="outbound"
+        ).update(initiated_at=timezone.now())
+E       UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+
+src/lipahub/service.py:126: UnboundLocalError
+________________________________________________________________ test_expire_marks_expired_after_final_query ________________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c1454210>
+
+    def test_expire_marks_expired_after_final_query(fake):
+>       p = pending(fake)
+            ^^^^^^^^^^^^^
+
+tests/test_jobs.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_jobs.py:15: in pending
+    service.initiate_payment(p.pk)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pk = UUID('f7a2550f-5236-4c12-b678-53fe8956079c')
+
+    def initiate_payment(pk):
+        """
+        claim automatically so a retry can never send a second prompt
+        """
+>       claimed = Payment.objects.filter(
+                  ^^^^^^^
+            pk=pk, status=S.CREATED.value, initiated_at__isnull=True, kind="outbound"
+        ).update(initiated_at=timezone.now())
+E       UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+
+src/lipahub/service.py:126: UnboundLocalError
+______________________________________________________________ test_expire_resolves_if_provider_says_succeeded ______________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c1455d30>
+
+    def test_expire_resolves_if_provider_says_succeeded(fake):
+>       p = pending(fake)
+            ^^^^^^^^^^^^^
+
+tests/test_jobs.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_jobs.py:15: in pending
+    service.initiate_payment(p.pk)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pk = UUID('ba0a5d08-fd82-4348-a25b-7783a20c65b4')
+
+    def initiate_payment(pk):
+        """
+        claim automatically so a retry can never send a second prompt
+        """
+>       claimed = Payment.objects.filter(
+                  ^^^^^^^
+            pk=pk, status=S.CREATED.value, initiated_at__isnull=True, kind="outbound"
+        ).update(initiated_at=timezone.now())
+E       UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+
+src/lipahub/service.py:126: UnboundLocalError
+________________________________________________________________ test_expire_with_unknown_outcome_is_flagged ________________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c145d980>
+
+    def test_expire_with_unknown_outcome_is_flagged(fake):
+        fake.initiate_mode = "timeout"
+>       p =pending(fake)
+           ^^^^^^^^^^^^^
+
+tests/test_jobs.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_jobs.py:15: in pending
+    service.initiate_payment(p.pk)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pk = UUID('41a4694e-2718-4961-840f-d1636396cb3e')
+
+    def initiate_payment(pk):
+        """
+        claim automatically so a retry can never send a second prompt
+        """
+>       claimed = Payment.objects.filter(
+                  ^^^^^^^
+            pk=pk, status=S.CREATED.value, initiated_at__isnull=True, kind="outbound"
+        ).update(initiated_at=timezone.now())
+E       UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+
+src/lipahub/service.py:126: UnboundLocalError
+_______________________________________________________________ test_expire_never_blind_when_no_status_query ________________________________________________________________
+
+    def test_expire_never_blind_when_no_status_query():
+        from src.lipahub.core.types import Capabilities
+>       p = pending(fake)
+                    ^^^^
+E       NameError: name 'fake' is not defined
+
+tests/test_jobs.py:64: NameError
+_________________________________________________________________________ test_jobs_are_idempotent __________________________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c155c7d0>
+
+    def test_jobs_are_idempotent(fake):
+>       p = pending(fake)
+            ^^^^^^^^^^^^^
+
+tests/test_jobs.py:72: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_jobs.py:15: in pending
+    service.initiate_payment(p.pk)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pk = UUID('9ba301b0-70a5-4e27-b9fb-1a3e06feb1ca')
+
+    def initiate_payment(pk):
+        """
+        claim automatically so a retry can never send a second prompt
+        """
+>       claimed = Payment.objects.filter(
+                  ^^^^^^^
+            pk=pk, status=S.CREATED.value, initiated_at__isnull=True, kind="outbound"
+        ).update(initiated_at=timezone.now())
+E       UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+
+src/lipahub/service.py:126: UnboundLocalError
+__________________________________________________________________________ test_purge_raw_payloads __________________________________________________________________________
+
+self = <QuerySet []>, defaults = {'last_run': datetime.datetime(2026, 11, 15, 23, 4, 3, 99123, tzinfo=datetime.timezone.utc), 'last_result': {'purged': 1}}
+kwargs = {'name': 'purge_raw_payloads'}
+
+    def get_or_create(self, defaults=None, **kwargs):
+        """
+        Look up an object with the given kwargs, creating one if necessary.
+        Return a tuple of (object, created), where created is a boolean
+        specifying whether an object was created.
+        """
+        # The get() needs to be targeted at the write database in order
+        # to avoid potential transaction consistency problems.
+        self._for_write = True
+        try:
+>           return self.get(**kwargs), False
+                   ^^^^^^^^^^^^^^^^^^
+
+.core/lib/python3.13/site-packages/django/db/models/query.py:1070: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <QuerySet []>, args = (), kwargs = {'name': 'purge_raw_payloads'}
+
+    def get(self, *args, **kwargs):
+        """
+        Perform the query and return a single object matching the given
+        keyword arguments.
+        """
+        if self.query.combinator and (args or kwargs):
+            raise NotSupportedError(
+                "Calling QuerySet.get(...) with filters after %s() is not "
+                "supported." % self.query.combinator
+            )
+        clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+        if self.query.can_filter() and not self.query.distinct_fields:
+            clone = clone.order_by()
+        limit = None
+        if (
+            not clone.query.select_for_update
+            or connections[clone.db].features.supports_select_for_update_with_limit
+        ):
+            limit = MAX_GET_RESULTS
+            clone.query.set_limits(high=limit)
+        num = len(clone)
+        if num == 1:
+            return clone._result_cache[0]
+        if not num:
+>           raise self.model.DoesNotExist(
+                "%s matching query does not exist." % self.model._meta.object_name
+            )
+E           src.lipahub.models.JobHeartbeat.DoesNotExist: JobHeartbeat matching query does not exist.
+
+.core/lib/python3.13/site-packages/django/db/models/query.py:722: DoesNotExist
+
+During handling of the above exception, another exception occurred:
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c155c710>
+
+    def test_purge_raw_payloads(fake):
+        from src.lipahub.models import Event
+        e = Event.objects.create(provider="fake", dedupe_key="x", raw_payload={"a":1})
+        Event.objects.filter(pk=e.pk).update(recieved_at=timezone.now() - timedelta(days=90))
+>       jobs.purge_raw_payloads()
+
+tests/test_jobs.py:84: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src/lipahub/jobs.py:88: in purge_raw_payloads
+    return _beat("purge_raw_payloads", purged=n)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/lipahub/jobs.py:14: in _beat
+    JobHeartbeat.objects.update_or_create(name=name, defaults={"last_run": timezone.now(), "last_result": result})
+.core/lib/python3.13/site-packages/django/db/models/manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.core/lib/python3.13/site-packages/django/db/models/query.py:1112: in update_or_create
+    obj, created = self.select_for_update().get_or_create(
+.core/lib/python3.13/site-packages/django/db/models/query.py:1072: in get_or_create
+    params = self._extract_model_params(defaults, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <QuerySet []>, defaults = {'last_run': datetime.datetime(2026, 11, 15, 23, 4, 3, 99123, tzinfo=datetime.timezone.utc), 'last_result': {'purged': 1}}
+kwargs = {'name': 'purge_raw_payloads'}
+
+    def _extract_model_params(self, defaults, **kwargs):
+        """
+        Prepare `params` for creating a model instance based on the given
+        kwargs; for use by get_or_create().
+        """
+        defaults = defaults or {}
+        params = {k: v for k, v in kwargs.items() if LOOKUP_SEP not in k}
+        params.update(defaults)
+        property_names = self.model._meta._property_names
+        invalid_params = []
+        for param in params:
+            try:
+                self.model._meta.get_field(param)
+            except exceptions.FieldDoesNotExist:
+                # It's okay to use a model's property if it has a setter.
+                if not (param in property_names and getattr(self.model, param).fset):
+                    invalid_params.append(param)
+        if invalid_params:
+>           raise exceptions.FieldError(
+                "Invalid field name(s) for model %s: '%s'."
+                % (
+                    self.model._meta.object_name,
+                    "', '".join(sorted(invalid_params)),
+                )
+            )
+E           django.core.exceptions.FieldError: Invalid field name(s) for model JobHeartbeat: 'last_run'.
+
+.core/lib/python3.13/site-packages/django/db/models/query.py:1170: FieldError
+______________________________________________________________________ test_dispatch_emits_signal_once ______________________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c158a8e0>
+
+    def test_dispatch_emits_signal_once(fake):
+        got = []
+        receiver = lambda sender, payment, **kw: got.append(payment.pk)
+>       signals.payment_succeeded.connect(receiver)
+        ^^^^^^^
+E       NameError: name 'signals' is not defined
+
+tests/test_outbox.py:15: NameError
+_________________________________________________________________ test_failing_reciever_is_retired_not_lost _________________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c158b330>
+
+    def test_failing_reciever_is_retired_not_lost(fake):
+        def boom(sender, **kw):
+            raise RuntimeError("receiver bug")
+>       signals.payment_succeeded.connect(boom)
+        ^^^^^^^
+E       NameError: name 'signals' is not defined
+
+tests/test_outbox.py:28: NameError
+_________________________________________________________________________ test_late_success_signal __________________________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c13459f0>
+
+    def test_late_success_signal(fake):
+>       p = service.create_payment(initiate=False, amount=10000, provider="fake", msisdn="0700123456")
+            ^^^^^^^
+E       NameError: name 'service' is not defined
+
+tests/test_outbox.py:39: NameError
+_______________________________________________________________ test_create_is_idempotent_and_initiates_once ________________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c13462b0>
+django_capture_on_commit_callbacks = <bound method TestCase.captureOnCommitCallbacks of <class 'django.test.testcases.TestCase'>>
+
+    def test_create_is_idempotent_and_initiates_once(fake, django_capture_on_commit_callbacks):
+        with django_capture_on_commit_callbacks(execute=True):
+>           a, b = make(), make()
+                   ^^^^^^
+
+tests/test_service.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_service.py:13: in make
+    return service.create_payment(**d)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+amount = 1000, currency = 'KES', method = 'mobile_money', provider = 'fake', msisdn = '+254700123456', reference = 'ORD-1', idempotency_key = 'k1', metadata = {}
+merchant_id = 1, description = '', initiate = True
+
+    def create_payment(
+        *, amount, currency="KES", method="mobile_money", provider=None, msisdn=None,
+        reference="", idempotency_key=None, metadata=None, merchant_id=0,
+        description="", initiate=True  ) -> Payment:
+        """
+        Write first, call second
+        """
+        amount = money.validate_minor(amount)
+        currency = currency.upper()
+        msisdn = normalize_msisdn(msisdn) if msisdn else None
+        provider = registry.resolve_provider(currency=currency, method=method , provider=provider)
+        metadata = dict(metadata or {})
+        h = _hash(amount=amount, currency=currency, method=method, provider=provider, reference=reference, metadata=metadata,msisdn=msisdn)
+        qs = Payment.objects.filter(merchant_id=merchant_id)
+    
+        def _existing():
+            if idempotency_key:
+                found = qs.filter(idempotency_key=idempotency_key)
+                if found:
+                    return found
+            if reference:
+                return qs.filter(reference=reference, status__in=OPEN_VALUES, kind="outbound").first()
+            return None
+    
+        found = _existing()
+        if found:
+            return _same_or_conflict(found, h)
+        try:
+            with transaction.atomic():
+                payment = Payment.objects.create(
+                    merchant_id=merchant_id, idempotency_key=idempotency_key, request_hash=h, provider=provider,
+                    method=method, amount=amount, currency=currency, msisdn=msisdn, reference=reference,
+                    description=description[:100], metadata=metadata,
+                    expires_at=timezone.now() + timedelta(minutes=get("PAYMENT_EXPIRY_MINUTES")),
+                )
+        except IntegrityError:
+            found = _existing()
+            if found:
+                return _same_or_conflict(found, h)
+            raise
+        if initiate:
+>           transaction.on_comit(lambda: _start(payment.pk))
+            ^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'django.db.transaction' has no attribute 'on_comit'. Did you mean: 'on_commit'?
+
+src/lipahub/service.py:108: AttributeError
+__________________________________________________________________ test_same_key_different_data_conflicts ___________________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c154aad0>
+
+    def test_same_key_different_data_conflicts(fake):
+>       make()
+
+tests/test_service.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_service.py:13: in make
+    return service.create_payment(**d)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+amount = 1000, currency = 'KES', method = 'mobile_money', provider = 'fake', msisdn = '+254700123456', reference = 'ORD-1', idempotency_key = 'k1', metadata = {}
+merchant_id = 1, description = '', initiate = True
+
+    def create_payment(
+        *, amount, currency="KES", method="mobile_money", provider=None, msisdn=None,
+        reference="", idempotency_key=None, metadata=None, merchant_id=0,
+        description="", initiate=True  ) -> Payment:
+        """
+        Write first, call second
+        """
+        amount = money.validate_minor(amount)
+        currency = currency.upper()
+        msisdn = normalize_msisdn(msisdn) if msisdn else None
+        provider = registry.resolve_provider(currency=currency, method=method , provider=provider)
+        metadata = dict(metadata or {})
+        h = _hash(amount=amount, currency=currency, method=method, provider=provider, reference=reference, metadata=metadata,msisdn=msisdn)
+        qs = Payment.objects.filter(merchant_id=merchant_id)
+    
+        def _existing():
+            if idempotency_key:
+                found = qs.filter(idempotency_key=idempotency_key)
+                if found:
+                    return found
+            if reference:
+                return qs.filter(reference=reference, status__in=OPEN_VALUES, kind="outbound").first()
+            return None
+    
+        found = _existing()
+        if found:
+            return _same_or_conflict(found, h)
+        try:
+            with transaction.atomic():
+                payment = Payment.objects.create(
+                    merchant_id=merchant_id, idempotency_key=idempotency_key, request_hash=h, provider=provider,
+                    method=method, amount=amount, currency=currency, msisdn=msisdn, reference=reference,
+                    description=description[:100], metadata=metadata,
+                    expires_at=timezone.now() + timedelta(minutes=get("PAYMENT_EXPIRY_MINUTES")),
+                )
+        except IntegrityError:
+            found = _existing()
+            if found:
+                return _same_or_conflict(found, h)
+            raise
+        if initiate:
+>           transaction.on_comit(lambda: _start(payment.pk))
+            ^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'django.db.transaction' has no attribute 'on_comit'. Did you mean: 'on_commit'?
+
+src/lipahub/service.py:108: AttributeError
+___________________________________________________________________ test_open_reference_dedups_double_tap ___________________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c1344e10>
+
+    def test_open_reference_dedups_double_tap(fake):
+>       a = make(idempotte4ncy_key=None)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_service.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+kw = {'idempotte4ncy_key': None}
+
+    def make(**kw):
+        d = dict(amount=1000, currency="KES", method="mobile_money", provider="fake", msisdn="0700123456", reference="ORD-1", idempotency_key="k1", merchant_id=1)
+        d.update(kw)
+>       return service.create_payment(**d)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: create_payment() got an unexpected keyword argument 'idempotte4ncy_key'. Did you mean 'idempotency_key'?
+
+tests/test_service.py:13: TypeError
+___________________________________________________________ test_provider_must_be_named_when_ambiguous_or_missing ___________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c13460d0>
+
+    def test_provider_must_be_named_when_ambiguous_or_missing(fake):
+        with pytest.raises(NoProviderAvailable):
+>           make(provider="nope")
+
+tests/test_service.py:33: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_service.py:13: in make
+    return service.create_payment(**d)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/lipahub/service.py:77: in create_payment
+    provider = registry.resolve_provider(currency=currency, method=method , provider=provider)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/lipahub/registry.py:34: in resolve_provider
+    if not get_adapter(provider).supports(currency=currency, method=method):
+           ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'nope'
+
+    def get_adapter(name):
+        if name in _instances:
+            return _instances[name]
+    
+        providers = get("PROVIDERS")
+    
+        if name not in providers:
+>           raise ConfigurationError(f"provider {name!r} has no 'adapter' path" )
+E           src.lipahub.core.errors.ConfigurationError: provider 'nope' has no 'adapter' path
+
+src/lipahub/registry.py:24: ConfigurationError
+_______________________________________________________________ test_not_called_if_host_transaction_rollsback _______________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c1346670>
+django_capture_on_commit_callbacks = <bound method TestCase.captureOnCommitCallbacks of <class 'django.test.testcases.TestCase'>>
+
+    def test_not_called_if_host_transaction_rollsback(fake, django_capture_on_commit_callbacks):
+        with django_capture_on_commit_callbacks(execute=True):
+>           make()
+
+tests/test_service.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/test_service.py:13: in make
+    return service.create_payment(**d)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+amount = 1000, currency = 'KES', method = 'mobile_money', provider = 'fake', msisdn = '+254700123456', reference = 'ORD-1', idempotency_key = 'k1', metadata = {}
+merchant_id = 1, description = '', initiate = True
+
+    def create_payment(
+        *, amount, currency="KES", method="mobile_money", provider=None, msisdn=None,
+        reference="", idempotency_key=None, metadata=None, merchant_id=0,
+        description="", initiate=True  ) -> Payment:
+        """
+        Write first, call second
+        """
+        amount = money.validate_minor(amount)
+        currency = currency.upper()
+        msisdn = normalize_msisdn(msisdn) if msisdn else None
+        provider = registry.resolve_provider(currency=currency, method=method , provider=provider)
+        metadata = dict(metadata or {})
+        h = _hash(amount=amount, currency=currency, method=method, provider=provider, reference=reference, metadata=metadata,msisdn=msisdn)
+        qs = Payment.objects.filter(merchant_id=merchant_id)
+    
+        def _existing():
+            if idempotency_key:
+                found = qs.filter(idempotency_key=idempotency_key)
+                if found:
+                    return found
+            if reference:
+                return qs.filter(reference=reference, status__in=OPEN_VALUES, kind="outbound").first()
+            return None
+    
+        found = _existing()
+        if found:
+            return _same_or_conflict(found, h)
+        try:
+            with transaction.atomic():
+                payment = Payment.objects.create(
+                    merchant_id=merchant_id, idempotency_key=idempotency_key, request_hash=h, provider=provider,
+                    method=method, amount=amount, currency=currency, msisdn=msisdn, reference=reference,
+                    description=description[:100], metadata=metadata,
+                    expires_at=timezone.now() + timedelta(minutes=get("PAYMENT_EXPIRY_MINUTES")),
+                )
+        except IntegrityError:
+            found = _existing()
+            if found:
+                return _same_or_conflict(found, h)
+            raise
+        if initiate:
+>           transaction.on_comit(lambda: _start(payment.pk))
+            ^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'django.db.transaction' has no attribute 'on_comit'. Did you mean: 'on_commit'?
+
+src/lipahub/service.py:108: AttributeError
+_____________________________________________________________________ test_rejected_push_fails_payment ______________________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c1345b30>
+
+    def test_rejected_push_fails_payment(fake):
+        fake.initiate_mode = "reject"
+        p = make(initiate=False)
+>       service.initiate_payment(p.pk)
+
+tests/test_service.py:43: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pk = UUID('5e090d66-f278-42e8-b1a2-838045e73b90')
+
+    def initiate_payment(pk):
+        """
+        claim automatically so a retry can never send a second prompt
+        """
+>       claimed = Payment.objects.filter(
+                  ^^^^^^^
+            pk=pk, status=S.CREATED.value, initiated_at__isnull=True, kind="outbound"
+        ).update(initiated_at=timezone.now())
+E       UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+
+src/lipahub/service.py:126: UnboundLocalError
+___________________________________________________________ test_timeout_leaves_pending_unknown_and_never_retries ___________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c1344370>
+
+    def test_timeout_leaves_pending_unknown_and_never_retries(fake):
+        fake.initiate_mode = "timeout"
+        p = make(initiate=False)
+>       service.initiate_payment(p.pk)
+
+tests/test_service.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pk = UUID('6574da0f-4557-40fb-bbda-2d3f4843c773')
+
+    def initiate_payment(pk):
+        """
+        claim automatically so a retry can never send a second prompt
+        """
+>       claimed = Payment.objects.filter(
+                  ^^^^^^^
+            pk=pk, status=S.CREATED.value, initiated_at__isnull=True, kind="outbound"
+        ).update(initiated_at=timezone.now())
+E       UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+
+src/lipahub/service.py:126: UnboundLocalError
+_____________________________________________________________ test_transition_writes_audit_and_outbox_together ______________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c1346e90>
+
+    def test_transition_writes_audit_and_outbox_together(fake):
+        p = make(initiate=False)
+>       service.transition(p.pk, status.PENDING, source="test")
+                                 ^^^^^^
+E       NameError: name 'status' is not defined
+
+tests/test_service.py:59: NameError
+________________________________________________________________________________ test_reaper ________________________________________________________________________________
+
+fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c1347570>
+
+    def test_reaper(fake):
+        never = make(initiate=False, reference="A", idempotency_key="a")
+>       service.reap_created(never.pk)
+
+tests/test_service.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src/lipahub/service.py:372: in reap_created
+    _safe_transition(pk, S.FAILED, source="reap", failure_code=FailureCode.NOT_SENT, failure_message="payment was never sent to the provider")
+src/lipahub/service.py:188: in _safe_transition
+    return transition(pk, new_status, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pk = UUID('35e8b1bb-717d-484d-9e94-4262adae7d2d'), new_status = <Status.FAILED: 'failed'>, source = 'reap', failure_code = 'not_sent'
+failure_message = 'payment was never sent to the provider', need_review = None, verified = False, matadata = None, provider_ref = None
+
+    def transition(
+        pk, new_status, *,source, failure_code="", failure_message="", need_review=None,
+        verified=False, matadata=None, provider_ref=None) -> Payment:
+        new = Status(new_status)
+        with transaction.atomic():
+            p = Payment.objects.select_for_update().get(pk=pk)
+            old = Status(p.status)
+            late = check_transition(old, new, verified=verified)
+            p.status = new.value
+    
+            if new in FAILED_LIKE:
+                p.failure_code, p.failure_massage = failure_code[:50], failure_message[:200]
+>           if needs_review:
+               ^^^^^^^^^^^^
+E           NameError: name 'needs_review' is not defined
+
+src/lipahub/service.py:171: NameError
+_________________________________________________________________ test_provider_without_adapter_is_an_error _________________________________________________________________
+
+    def test_provider_without_adapter_is_an_error():
+        with override_settings(LIPAHUB={"PROVIDERS": {"foo": {}}}):
+>           assert "lipahub.E003" in ids()
+E           AssertionError: assert 'lipahub.E003' in {'lipahub.E005', 'lipahub.W001', 'lipahub.W003', 'lipahub.W004', 'lipahub.W007'}
+E            +  where {'lipahub.E005', 'lipahub.W001', 'lipahub.W003', 'lipahub.W004', 'lipahub.W007'} = ids()
+
+tests/test_checks.py:32: AssertionError
+____________________________________________________________________ test_valid_settings_have_no_errors _____________________________________________________________________
+
+    def test_valid_settings_have_no_errors():
+        from src.lipahub.settings import validate
+>       assert [p for p in validate() if p[0] == "error"] == []
+E       assert [('error', 'l...S' (typo?).")] == []
+E         
+E         Left contains one more item: ('error', 'lipahub.E001', "Unknown LIPAHUB setting 'OUTBOX_MAX_ATTEMPTS' (typo?).")
+E         Use -v to get more diff
+
+tests/test_checks.py:36: AssertionError
+============================================================================= warnings summary ==============================================================================
+tests/test_checks.py::test_atommic_requests_warn
+  /home/teralinkx/projects/lipahub/tests/test_checks.py:21: UserWarning: Overriding setting DATABASES can lead to unexpected behavior.
+    with override_settings(DATABASES=dbs):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+========================================================================== short test summary info ==========================================================================
+FAILED tests/test_events.py::test_confirmed_success_transitions_once_and_replay_is_deduped - UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+FAILED tests/test_events.py::test_unconfirmed_success_waits_for_provider_staatus - UnboundLocalError: cannot access local variable 'Payment' where it is not associated witha value
+FAILED tests/test_events.py::test_forged_success_that_provider_denies_is_flagged - UnboundLocalError: cannot access local variable 'Payment' where it is not associated witha value
+FAILED tests/test_events.py::test_amount_mismatch_never_transitions - UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+FAILED tests/test_events.py::test_early_callback_before_pending_is_handled - TypeError: ProviderEvent.__init__() got an unexpected keyword argument 'dedupekey'. Did you mean 'dedupe_key'?
+FAILED tests/test_events.py::test_failure_event_then_late_success_is_flagged - UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+FAILED tests/test_events.py::test_success_event_for_unknown_payment_is_stored_not_dropped - AttributeError: module 'src.lipahub.service' has no attribute 'ingest_inbound'
+FAILED tests/test_events.py::test_inbound_matching_open_payment_completes_it - UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+FAILED tests/test_events.py::test_phonenumbers_are_scrubbed_from_stored_payloads - UnboundLocalError: cannot access local variable 'Payment' where it is not associated witha value
+FAILED tests/test_events.py::testwebhookview - UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+FAILED tests/test_jobs.py::test_poll_pending_resolvers_a_missed_webhook - UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+FAILED tests/test_jobs.py::test_poll_skips_fresh_payment - UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+FAILED tests/test_jobs.py::test_expire_marks_expired_after_final_query - UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+FAILED tests/test_jobs.py::test_expire_resolves_if_provider_says_succeeded - UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+FAILED tests/test_jobs.py::test_expire_with_unknown_outcome_is_flagged - UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+FAILED tests/test_jobs.py::test_expire_never_blind_when_no_status_query - NameError: name 'fake' is not defined
+FAILED tests/test_jobs.py::test_jobs_are_idempotent - UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+FAILED tests/test_jobs.py::test_purge_raw_payloads - django.core.exceptions.FieldError: Invalid field name(s) for model JobHeartbeat: 'last_run'.
+FAILED tests/test_outbox.py::test_dispatch_emits_signal_once - NameError: name 'signals' is not defined
+FAILED tests/test_outbox.py::test_failing_reciever_is_retired_not_lost - NameError: name 'signals' is not defined
+FAILED tests/test_outbox.py::test_late_success_signal - NameError: name 'service' is not defined
+FAILED tests/test_service.py::test_create_is_idempotent_and_initiates_once - AttributeError: module 'django.db.transaction' has no attribute 'on_comit'. Did you mean: 'on_commit'?
+FAILED tests/test_service.py::test_same_key_different_data_conflicts - AttributeError: module 'django.db.transaction' has no attribute 'on_comit'. Did you mean: 'on_commit'?
+FAILED tests/test_service.py::test_open_reference_dedups_double_tap - TypeError: create_payment() got an unexpected keyword argument 'idempotte4ncy_key'. Did you mean 'idempotency_key'?
+FAILED tests/test_service.py::test_provider_must_be_named_when_ambiguous_or_missing - src.lipahub.core.errors.ConfigurationError: provider 'nope' has no 'adapter' path
+FAILED tests/test_service.py::test_not_called_if_host_transaction_rollsback - AttributeError: module 'django.db.transaction' has no attribute 'on_comit'. Did you mean: 'on_commit'?
+FAILED tests/test_service.py::test_rejected_push_fails_payment - UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+FAILED tests/test_service.py::test_timeout_leaves_pending_unknown_and_never_retries - UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
+FAILED tests/test_service.py::test_transition_writes_audit_and_outbox_together - NameError: name 'status' is not defined
+FAILED tests/test_service.py::test_reaper - NameError: name 'needs_review' is not defined
+FAILED tests/test_checks.py::test_provider_without_adapter_is_an_error - AssertionError: assert 'lipahub.E003' in {'lipahub.E005', 'lipahub.W001', 'lipahub.W003', 'lipahub.W004', 'lipahub.W007'}
+FAILED tests/test_checks.py::test_valid_settings_have_no_errors - assert [('error', 'l...S' (typo?).")] == []
+================================================================= 32 failed, 83 passed, 1 warning in 0.88s ==================================================================
+(.core) ➜  lipahub git:(master) ✗ 

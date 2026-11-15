@@ -15,7 +15,7 @@ ALLOWED_HOSTS = ["testserver", "localhost"]
 
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
-    "lipahub",
+    "src.lipahub",
 ]
 
 if os.getenv("LIPAHUB_TEST_PG"):

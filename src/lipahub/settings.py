@@ -9,7 +9,7 @@ DEFAULTS = {
     "PROVIDERS": {},
     "TASK_RUNNER": "sync",
     "CALLBACK_BASE_URL": "",
-    "CALLBACK_PATH_PREFIX: "/lipahub",
+    "CALLBACK_PATH_PREFIX": "/lipahub",
     "CALLBACK_TOKEN": "",
     "CALLBACK_ALLOWED_IPS": [],
     "PENDING_POLL_AFTER_SECONDS": 120,
@@ -36,7 +36,7 @@ def env(name, default=""):
 def all_settings() -> dict:
     from django.conf import settings
 
-   return {**DEFAULTS, **(getattr(settings, "LIPAHUB", None) or {})}
+    return {**DEFAULTS, **(getattr(settings, "LIPAHUB", None) or {})}
 
 
 def get(name):
@@ -63,12 +63,12 @@ def validate(user_cfg=None):
         if key in POSITIVE_INTS:
             if not _is_int(cfg[key]) or cfg[key] < 0:
                 out.append(("error", "lipahub.E003", f"LIPAHUB setting {key!r} must be a positive integer"))
-        if not _is_int(cfg["INBOUND_MERCHANT_ID"] or cfg["INBOUND_MERCHANT_ID"] < 0:
+        if not _is_int(cfg["INBOUND_MERCHANT_ID"]) or cfg["INBOUND_MERCHANT_ID"] < 0:
             out.append(("error", "lipahub.E003", f"LIPAHUB setting INBOUND_MERCHANT_ID must be integers >=0"))
         
         providers = cfg["PROVIDERS"]
         if not isinstance(providers, dict):
-            out.append(("error", "lipahub.E004, "LIPAHUB.PROVIDERS must be a dictionary"))
+            out.append(("error", "lipahub.E004", "LIPAHUB.PROVIDERS must be a dictionary"))
         else:
             for name, pc in providers.items():
                 if not isinstance(pc, dict) or not isinstance(pc.get("adapter"), str):
@@ -91,45 +91,6 @@ def validate(user_cfg=None):
         if token and len(token) < MIN_TOKEN_LENGTH and not dj.DEBUG:
             out.append(("warning", "lipahub.W006", f"LIPAHUB.CALLBACK_TOKEN must be at least {MIN_TOKEN_LENGTH} characters"))
 
-    return out):
+    return out
 
 
-# SECRET_KEY = "test"
-# DEBUG = False
-# USE_TZ = True
-
-# INSTALLED_APPS = [
-#     "django.contrib.contenttypes",
-#     "django.contrib.auth",
-#     "lipahub",
-# ]
-
-# ROOT_URLCONF = "test.urls"
-# DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-# SILENCED_SYSTEM_CKECKS = ["lipahub.W001, lipahub.W002, lipahub.W003, lipahub.W004"]
-
-# if os.getenv("DATABASE_URL"):
-#     DATABASES = {
-#         "default": {
-#             "ENGINE": "django.db.backends.postgresql",
-#             "NAME": os.environ["DB_NAME"],
-#             "USER": os.environ["DB_USER"],
-#             "PASSWORD": os.environ["DB_PASSWORD"],
-#             "HOST": os.environ["DB_HOST"],
-#             "PORT": os.environ["DB_PORT"],
-#         }
-#     }
-# else:
-#     DATABASES = {
-#         "default": {
-#             "ENGINE": "django.db.backends.sqlite3",
-#             "NAME": ":memory:",
-#         }
-#     }
-
-
-# LIPAHUB = {
-#     "PROVIDERS": {"fake": {"adapter": "lipahub.providers.fake.FakeAdapter"}},
-#     "CALLBACK_BASE_URL": "https://example.test",
-#     "CALLBACK_TOKEN": "tok"
-# }

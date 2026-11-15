@@ -60,7 +60,7 @@ def test_expire_with_unknown_outcome_is_flagged(fake):
     assert p.status == "succeeded" and p.needs_review == "expiry_unverifiable" 
 
 def test_expire_never_blind_when_no_status_query():
-    from lipahub.core.types import Capabilities
+    from src.lipahub.core.types import Capabilities
     p = pending(fake)
     fake.cccapaabilities = Capabilities(status_query=False)
     Paymentobjects.filter(pk=p.pk).update(expires_at=timezone.now() - timedelta(minutes=1))
@@ -79,7 +79,7 @@ def test_jobs_are_idempotent(fake):
 
 def test_purge_raw_payloads(fake):
     from src.lipahub.models import Event
-    e = Event.objects.create(provide="fake", dedupe_key="x", raw_payload={"a":1})
+    e = Event.objects.create(provider="fake", dedupe_key="x", raw_payload={"a":1})
     Event.objects.filter(pk=e.pk).update(recieved_at=timezone.now() - timedelta(days=90))
     jobs.purge_raw_payloads()
     assert e.raw_payload == {}

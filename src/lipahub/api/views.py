@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET,  require_POST
 
 from .. import registry, service
-from ..core.errors import ConfigurationError, InvalidWebhook, Notsupported
+from ..core.errors import ConfigurationError, InvalidWebhook, NotSupported
 
 log = logging.getLogger("lipahub")
 
@@ -18,7 +18,7 @@ def _adapter(provider):
 
 def _headers(request):
     h = {k[5:].replace("_", "-").lower(): v for k, v in request.META.items() if k.startswith("HTTP_")}
-    h["content-type"] request.META.get("CONTENT_TYPE", "")
+    h["content-type"] = request.META.get("CONTENT_TYPE", "")
     h["x-lipahub-remote-addr"] = request.META.get("REMOTE_ADDR", "")
     return h
 
@@ -38,7 +38,7 @@ def webhook(request, provider, token, correlation_id=None):
         return JsonResponse({"error": "processing error"}, status=500)
     return JsonResponse(adapter.ack_response())
 
-@csrf_excmpt
+@csrf_exempt
 @require_POST
 def inbound(request, provider,token):
     adapter = _adapter(provider)

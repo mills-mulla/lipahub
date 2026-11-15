@@ -65,7 +65,7 @@ def _same_or_conflict(existing: Payment, h: str) -> Payment:
 #---------------- create / initiate ------------------------------------------------
 
 def create_payment(
-    *, amount, currency="KES", mathod="mobile_money", provider=None, msisdn=None,
+    *, amount, currency="KES", method="mobile_money", provider=None, msisdn=None,
     reference="", idempotency_key=None, metadata=None, merchant_id=0,
     description="", initiate=True  ) -> Payment:
     """
@@ -74,13 +74,13 @@ def create_payment(
     amount = money.validate_minor(amount)
     currency = currency.upper()
     msisdn = normalize_msisdn(msisdn) if msisdn else None
-    provider = registry.resolve_provider(currency=currecy, method=method , provider=provide)
-    metadata = dict(metadta or {})
-    h = _hash(amount=amount, currency=currency, method=method, provider=provide, reference=reference, metadata=metadata,msisdn=msisdn)
+    provider = registry.resolve_provider(currency=currency, method=method , provider=provider)
+    metadata = dict(metadata or {})
+    h = _hash(amount=amount, currency=currency, method=method, provider=provider, reference=reference, metadata=metadata,msisdn=msisdn)
     qs = Payment.objects.filter(merchant_id=merchant_id)
 
     def _existing():
-        if idempotecy_key:
+        if idempotency_key:
             found = qs.filter(idempotency_key=idempotency_key)
             if found:
                 return found
@@ -94,7 +94,7 @@ def create_payment(
     try:
         with transaction.atomic():
             payment = Payment.objects.create(
-                merchant_id=merchant_id, idempotency_key=idempotency_key, request_hash=h, provider=provide,
+                merchant_id=merchant_id, idempotency_key=idempotency_key, request_hash=h, provider=provider,
                 method=method, amount=amount, currency=currency, msisdn=msisdn, reference=reference,
                 description=description[:100], metadata=metadata,
                 expires_at=timezone.now() + timedelta(minutes=get("PAYMENT_EXPIRY_MINUTES")), 
