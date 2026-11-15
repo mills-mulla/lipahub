@@ -7,7 +7,7 @@ USE_TZ = True
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.auth",
-    "lipahub",
+    "src.lipahub",
 ]
 
 ROOT_URLCONF = "test.urls"

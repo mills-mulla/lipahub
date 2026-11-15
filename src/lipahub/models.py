@@ -32,23 +32,23 @@ class Payment(models.Model):
 
     class Meta:
         db_table = "lipahub_payment"
-        # constraints = {
-        #     models.UniqueConstraint(
-        #         fields=["merchant_id", "idempotency_key"],
-        #         condition=Q(idempotency_key__isnull=False),
-        #         name="lp_uniq_merchant_idem",
-        #     ),
-        #     models.UniqueConstraint(
-        #         fields=["provider", "provider_ref"],
-        #         condition=Q(provider_ref__isnull=False),
-        #         name="lp_uniq_provider_ref",
-        #     ),
-        #     models.UniqueConstraint(
-        #         fields=["merchant_id", "reference"],
-        #         condition=Q(ststus__in=["created","pending"], kind="outbound") & ~Q(reference=""),
-        #         name="lp_uniq_open_reference",
-        #     ),
-        # }
+        constraints = [
+            models.UniqueConstraint(
+                fields=["merchant_id", "idempotency_key"],
+                condition=Q(idempotency_key__isnull=False),
+                name="lp_uniq_merchant_idem",
+            ),
+            models.UniqueConstraint(
+                fields=["provider", "provider_ref"],
+                condition=Q(provider_ref__isnull=False),
+                name="lp_uniq_provider_ref",
+            ),
+            models.UniqueConstraint(
+                fields=["merchant_id", "reference"],
+                condition=Q(ststus__in=["created","pending"], kind="outbound") & ~Q(reference=""),
+                name="lp_uniq_open_reference",
+            ),
+        ]
         indexes = [models.Index(fields=["status", "created_at"], name="lp_status_created-idx")]
 
     def __str__(self):
@@ -62,7 +62,7 @@ class Event(models.Model):
     kind = models.CharField(max_length=10, default="payment")
     provider = models.CharField(max_length=20)
     dedupe_key = models.CharField(max_length=150)
-    source_verified = models.BolleanField(default=False)
+    source_verified = models.BooleanField(default=False)
     outcome = models.CharField(max_length=20, blank=True, default="")
     amount = models.PositiveIntegerField(null=True, blank=True)
     currency = models.CharField(max_length=13, blank=True)
@@ -79,7 +79,7 @@ class Event(models.Model):
 
     class Meta:
         db_table = "lipahub_event"
-        constraints = [models.UniqueCostraint(fields=["provider", "dedupe_key"], name="lp_uniq_event_dedupe")]
+        constraints = [models.UniqueConstraint(fields=["provider", "dedupe_key"], name="lp_uniq_event_dedupe")]
 
 class Transition(models.Model):
     payment = models.ForeignKey(Payment,on_delete=models.CASCADE, related_name="transitions")
@@ -95,7 +95,7 @@ class Outbox(models.Model):
     payment = models.ForeignKey(Payment,on_delete=models.CASCADE, related_name="outbox")
     kind = models.CharField(max_length=40)
     payload = models.JSONField(default=dict)
-    create_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     dispatched_at = models.DateTimeField(null=True, blank=True)
     attempts = models.IntegerField(default=0)
     last_error = models.TextField( blank=True, default="")
@@ -117,7 +117,7 @@ class Refund(models.Model):
         db_table = "lipahub_refund"
 
 class JobHeartbeat(models.Model):
-    name = models.CharField(max_lenth=50, primary_key=True)
+    name = models.CharField(max_length=50, primary_key=True)
     last_run = models.DateTimeField
     last_result = models.JSONField(default=dict,blank=True)
 

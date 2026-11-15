@@ -1,6 +1,6 @@
 import pytest
 from src.lipahub.core.states import Status
-from lipahub.models import Outbox
+from src.lipahub.models import Outbox
 
 pytestmark = pytest.mark.django_db
 def make_succeeded(fake):
