@@ -1,4 +1,3 @@
-import dataclasses
 import logging
 
 from django.http import Http404, JsonResponse
@@ -28,11 +27,11 @@ def webhook(request, provider, token, correlation_id=None):
     adapter = _adapter(provider)
     try:
         ev = adapter.parse_webhook(_headers(request), request.body, token)
-    except InvalidWebhook:
+    except InvalidWebhook as e:
         return JsonResponse({"error":  e.message}, status=e.status)
     
     try:
-        service.injest_event(provider, ev, correlation_id=correlation_id)
+        service.ingest_event(provider, ev, correlation_id=correlation_id)
     except Exception:
         log.exception("webhook processing error (%s)", provider)
         return JsonResponse({"error": "processing error"}, status=500)
@@ -50,7 +49,7 @@ def inbound(request, provider,token):
         return JsonResponse({"error":  e.message}, status=e.status)
     
     try:
-        service.injest_event(provider, ev)
+        service.ingest_inbound(provider, ev)
     except Exception:
         log.exception("inbound processing error (%s)", provider)
         return JsonResponse({"error": "processing error"}, status=500)

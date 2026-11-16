@@ -138,7 +138,7 @@ class DarajaAdapter(BaseAdapter):
         try:
             tid = str(d["TransID"])
             amount = to_minor(Decimal(str(d["TransAmount"])), "KES")
-        except (KeyError, ValueError, InvalidAmoount):
+        except (KeyError, ValueError, InvalidAmount):
             raise InvalidWebhook("malformed C2B payload", 400)
         m = str(d.get("MSISDN", ""))
         return InboundEvent(

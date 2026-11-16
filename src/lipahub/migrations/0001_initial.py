@@ -17,6 +17,7 @@ class Migration(migrations.Migration):
             name='JobHeartbeat',
             fields=[
                 ('name', models.CharField(max_length=50, primary_key=True, serialize=False)),
+                ('last_run', models.DateTimeField(blank=True, null=True)),
                 ('last_result', models.JSONField(blank=True, default=dict)),
             ],
             options={

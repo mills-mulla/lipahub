@@ -1,6 +1,5 @@
-from ...core.errors import(ConfigurationError, InvalidAmount, InvalidWebhook, ProviderRejected, ProviderUnavailable)
-from ...core.types import Capabilities, FailureCode, InitiateResult, Outcome, ProviderEvent, StatusResult
-from ...core.money import whole_units
+from ...core.errors import(ConfigurationError, InvalidWebhook, ProviderRejected, ProviderUnavailable)
+from ...core.types import Capabilities, FailureCode, InitiateResult, ProviderEvent, StatusResult
 from ...core.phone import normalize_msisdn
 from ..base import BaseAdapter, default_cache
 from .codes import map_status
@@ -45,7 +44,7 @@ class AirtelAdapter(BaseAdapter):
 
         data = r.json()
         if r.status != 200 or "access_token" not in data:
-            raise ProviderRejected(f"airtel auth failed", FailureCode.PROVIDER_ERROR, data)
+            raise ProviderRejected("airtel auth failed", FailureCode.PROVIDER_ERROR, data)
 
         self.cache.set(key, data["access_token"], max(int(data.get("expires_in", 3600) - 300), 30))
         return data["access_token"]

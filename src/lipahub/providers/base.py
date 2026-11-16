@@ -81,5 +81,5 @@ class BaseAdapter:
             raise InvalidWebhook("malformed body", 400)
 
         if not isinstance(data, dict):
-            raise InwalidWebhook("malformed body", 400)
+            raise InvalidWebhook("malformed body", 400)
         return data

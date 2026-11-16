@@ -53,20 +53,20 @@ def test_expire_resolves_if_provider_says_succeeded(fake):
 
 def test_expire_with_unknown_outcome_is_flagged(fake):
     fake.initiate_mode = "timeout"
-    p =pending(fake)
-    Payment.objects.filter(pk=p.pk).update(expires_at=timezone.now() - timedelta(minutes=1)) 
+    p = pending(fake)
+    Payment.objects.filter(pk=p.pk).update(expires_at=timezone.now() - timedelta(minutes=1))
     jobs.expire_stale()
     p.refresh_from_db()
-    assert p.status == "succeeded" and p.needs_review == "expiry_unverifiable" 
+    assert p.status == "pending" and p.need_review == "expiry_unverifiable"
 
-def test_expire_never_blind_when_no_status_query():
+def test_expire_never_blind_when_no_status_query(fake):
     from src.lipahub.core.types import Capabilities
     p = pending(fake)
-    fake.cccapaabilities = Capabilities(status_query=False)
-    Paymentobjects.filter(pk=p.pk).update(expires_at=timezone.now() - timedelta(minutes=1))
+    fake.capabilities = Capabilities(status_query=False)
+    Payment.objects.filter(pk=p.pk).update(expires_at=timezone.now() - timedelta(minutes=1))
     jobs.expire_stale()
     p.refresh_from_db()
-    assert p.status == "pending" and p.needs_review == "expiry_unverifiable"
+    assert p.status == "pending" and p.need_review == "expiry_unverifiable"
 
 def test_jobs_are_idempotent(fake):
     p = pending(fake)
@@ -74,6 +74,7 @@ def test_jobs_are_idempotent(fake):
     fake.default_status = Outcome.SUCCEEDED
     jobs.run_all()
     jobs.run_all()
+    p.refresh_from_db()
     assert p.status == "succeeded" and p.transitions.filter(to_status="succeeded").count() == 1
 
 
@@ -82,4 +83,5 @@ def test_purge_raw_payloads(fake):
     e = Event.objects.create(provider="fake", dedupe_key="x", raw_payload={"a":1})
     Event.objects.filter(pk=e.pk).update(recieved_at=timezone.now() - timedelta(days=90))
     jobs.purge_raw_payloads()
+    e.refresh_from_db()
     assert e.raw_payload == {}

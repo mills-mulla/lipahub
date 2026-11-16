@@ -12,7 +12,7 @@ log = logging.getLogger("lipahub")
 
 def _beat(name, **result):
     JobHeartbeat.objects.update_or_create(name=name, defaults={"last_run": timezone.now(), "last_result": result})
-    return results
+    return result
 
 def _each(name, pks, fn):
     counts = {}
@@ -27,7 +27,7 @@ def _each(name, pks, fn):
 
 def reaper_created():
     cutoff = timezone.now() - timedelta(seconds=get("CREATED_REAPER_AFTER_SECONDS"))
-    pks = Payment.Objects.filter(status="created", kind="outbound", created_at__lt=cutoff).values_list("pk", flat=True)[:200]
+    pks = Payment.objects.filter(status="created", kind="outbound", created_at__lt=cutoff).values_list("pk", flat=True)[:200]
     return _each("reaper_created", list(pks), service.reap_created)
 
 def poll_pending():
@@ -38,7 +38,7 @@ def poll_pending():
             status="pending",
             kind="outbound",
             created_at__lt=cutoff,
-            updated_at__gt=cutoff,
+            updated_at__lt=cutoff,
         ).values_list("pk", flat=True)[:200]
     )
 

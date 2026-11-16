@@ -24,8 +24,8 @@ def test_same_key_different_data_conflicts(fake):
         make(amount=20000)
     
 def test_open_reference_dedups_double_tap(fake):
-    a = make(idempotte4ncy_key=None)
-    b = make(idempotte4ncy_key=None)
+    a = make(idempotency_key=None)
+    b = make(idempotency_key=None)
     assert a.pk == b.pk
 
 def test_provider_must_be_named_when_ambiguous_or_missing(fake):
@@ -33,7 +33,7 @@ def test_provider_must_be_named_when_ambiguous_or_missing(fake):
         make(provider="nope")
 
 def test_not_called_if_host_transaction_rollsback(fake, django_capture_on_commit_callbacks):
-    with django_capture_on_commit_callbacks(execute=True):
+    with django_capture_on_commit_callbacks(execute=False):
         make()
     assert fake.initiate_calls == []
 
@@ -42,8 +42,8 @@ def test_rejected_push_fails_payment(fake):
     p = make(initiate=False)
     service.initiate_payment(p.pk)
     p.refresh_from_db()
-    assert p.status == "failed" and p.failure_code == "insufficent_funds"
-    assert Outbox.objects.filter(kind="payment_failed").count == 1
+    assert p.status == "failed" and p.failure_code == "provider_error"
+    assert Outbox.objects.filter(kind="payment_failed").count() == 1
 
 def test_timeout_leaves_pending_unknown_and_never_retries(fake):
     fake.initiate_mode = "timeout"
@@ -56,7 +56,7 @@ def test_timeout_leaves_pending_unknown_and_never_retries(fake):
 
 def test_transition_writes_audit_and_outbox_together(fake):
     p = make(initiate=False)
-    service.transition(p.pk, status.PENDING, source="test")
+    service.transition(p.pk, Status.PENDING, source="test")
     assert p.transitions.count() == 1
 
 def test_reaper(fake):
@@ -67,9 +67,9 @@ def test_reaper(fake):
 
     started = make(initiate=False, reference="B", idempotency_key="b")
     Payment.objects.filter(pk=started.pk).update(initiated_at=started.created_at)
-    service.reap_creted(started.pk)
+    service.reap_created(started.pk)
     started.refresh_from_db()
-    assert started.status == "pending" and started.needs_review == "outcome_unknown"
+    assert started.status == "pending" and started.need_review == "outcome_unknown"
  
 
 

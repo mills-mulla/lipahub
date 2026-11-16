@@ -1,8 +1,7 @@
 import logging
 
-from django.db import transaction
 from django.utils import timezone
-
+from django.db import transaction
 from . import signal
 from .models import Outbox, Payment
 
@@ -33,7 +32,7 @@ def dispatch(batch=100) -> int:
     delivered = 0
     for pk in ids:
         try:
-            with taransaction.atomic():
+            with transaction.atomic():
                 row = (
                     Outbox.objects.select_for_update(skip_locked=True)
                     .select_related("payment").filter(pk=pk, dispatched_at__isnull=True).first()

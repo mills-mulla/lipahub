@@ -118,8 +118,8 @@ class Refund(models.Model):
 
 class JobHeartbeat(models.Model):
     name = models.CharField(max_length=50, primary_key=True)
-    last_run = models.DateTimeField
-    last_result = models.JSONField(default=dict,blank=True)
+    last_run = models.DateTimeField(null=True, blank=True)
+    last_result = models.JSONField(default=dict, blank=True)
 
     class Meta:
         db_table = "lipahub_jobheartbeat"

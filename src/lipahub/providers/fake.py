@@ -1,8 +1,8 @@
 import json
 
-from ..core.errors import ProviderRejected,ProviderUnavailable
+from ..core.errors import ProviderRejected, ProviderUnavailable
 from ..core.types import (
-    Capabilities, FailureCode, InitiateResult, Outcome, ProviderEvent, StatusResult,
+    Capabilities, InitiateResult, Outcome, ProviderEvent, StatusResult,
 )
 from .base import BaseAdapter
 
@@ -48,7 +48,7 @@ class FakeAdapter(BaseAdapter):
         )
     
     def parse_inbound(self, headers, body, token):
-        raise NotImplmentedError #testa inject InboundEvent object directly
+        raise NotImplementedError #test inject InboundEvent object directly
     
     def list_transitions(self, since):
         return list(self.inbound)

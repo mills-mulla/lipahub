@@ -1,10 +1,12 @@
 import pytest
+from src.lipahub import outbox, service, signals
 from src.lipahub.core.states import Status
 from src.lipahub.models import Outbox
 
 pytestmark = pytest.mark.django_db
+
 def make_succeeded(fake):
-    p = service.crrate_payment(initiate=False, amount=1000, provider="fake", msisdn="0700123456", merchant_id=1)
+    p = service.create_payment(initiate=False, amount=1000, provider="fake", msisdn="0700123456", merchant_id=1)
     service.transition(p.pk, Status.PENDING, source="t")
     service.transition(p.pk, Status.SUCCEEDED, source="t")
     return p
@@ -39,5 +41,5 @@ def test_late_success_signal(fake):
     p = service.create_payment(initiate=False, amount=10000, provider="fake", msisdn="0700123456")
     service.transition(p.pk, Status.PENDING, source="t")
     service.transition(p.pk, Status.EXPIRED, source="t")
-    service.transition(p.pk, Status.SUCCEEDED, source="t", verified=True, need_review="late_success")
+    service.transition(p.pk, Status.SUCCEEDED, source="t", verified=True, needs_review="late_success")
     assert Outbox.objects.filter(kind="payment_late_success").count() == 1

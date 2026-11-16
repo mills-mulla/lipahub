@@ -13,8 +13,10 @@ class PaymentAdmin(admin.ModelAdmin):
     list_display = ("id", "provider", "amount", "currency", "status", "needs_review", "reference", "created_at")
     list_filter = ("status", "provider", "kind", "needs_review")
     search_fields = ("id", "reference", "provider_ref", "correlation_id")
-    readonly_fields = [f.name for t in Payment._meta.fields]
     inlines = [TransitionInline]
+    
+    def get_readonly_fields(self, request, obj=None):
+        return [field.name for field in self.model._meta.fields]
 
     def has_add_permission(self, request):
         return False

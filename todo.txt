@@ -637,9 +637,9 @@ merchant_id = 1, description = '', initiate = True
                 return _same_or_conflict(found, h)
             raise
         if initiate:
->           transaction.on_comit(lambda: _start(payment.pk))
+>           transaction.on_commit(lambda: _start(payment.pk))
             ^^^^^^^^^^^^^^^^^^^^
-E           AttributeError: module 'django.db.transaction' has no attribute 'on_comit'. Did you mean: 'on_commit'?
+E           AttributeError: module 'django.db.transaction' has no attribute 'on_commit'. Did you mean: 'on_commit'?
 
 src/lipahub/service.py:108: AttributeError
 __________________________________________________________________ test_same_key_different_data_conflicts ___________________________________________________________________
@@ -700,9 +700,9 @@ merchant_id = 1, description = '', initiate = True
                 return _same_or_conflict(found, h)
             raise
         if initiate:
->           transaction.on_comit(lambda: _start(payment.pk))
+>           transaction.on_commit(lambda: _start(payment.pk))
             ^^^^^^^^^^^^^^^^^^^^
-E           AttributeError: module 'django.db.transaction' has no attribute 'on_comit'. Did you mean: 'on_commit'?
+E           AttributeError: module 'django.db.transaction' has no attribute 'on_commit'. Did you mean: 'on_commit'?
 
 src/lipahub/service.py:108: AttributeError
 ___________________________________________________________________ test_open_reference_dedups_double_tap ___________________________________________________________________
@@ -710,20 +710,20 @@ ___________________________________________________________________ test_open_re
 fake = <src.lipahub.providers.fake.FakeAdapter object at 0x7f16c1344e10>
 
     def test_open_reference_dedups_double_tap(fake):
->       a = make(idempotte4ncy_key=None)
+>       a = make(idempotency_key=None)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 tests/test_service.py:27: 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-kw = {'idempotte4ncy_key': None}
+kw = {'idempotency_key': None}
 
     def make(**kw):
         d = dict(amount=1000, currency="KES", method="mobile_money", provider="fake", msisdn="0700123456", reference="ORD-1", idempotency_key="k1", merchant_id=1)
         d.update(kw)
 >       return service.create_payment(**d)
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       TypeError: create_payment() got an unexpected keyword argument 'idempotte4ncy_key'. Did you mean 'idempotency_key'?
+E       TypeError: create_payment() got an unexpected keyword argument 'idempotency_key'. Did you mean 'idempotency_key'?
 
 tests/test_service.py:13: TypeError
 ___________________________________________________________ test_provider_must_be_named_when_ambiguous_or_missing ___________________________________________________________
@@ -820,9 +820,9 @@ merchant_id = 1, description = '', initiate = True
                 return _same_or_conflict(found, h)
             raise
         if initiate:
->           transaction.on_comit(lambda: _start(payment.pk))
+>           transaction.on_commit(lambda: _start(payment.pk))
             ^^^^^^^^^^^^^^^^^^^^
-E           AttributeError: module 'django.db.transaction' has no attribute 'on_comit'. Did you mean: 'on_commit'?
+E           AttributeError: module 'django.db.transaction' has no attribute 'on_commit'. Did you mean: 'on_commit'?
 
 src/lipahub/service.py:108: AttributeError
 _____________________________________________________________________ test_rejected_push_fails_payment ______________________________________________________________________
@@ -971,11 +971,11 @@ FAILED tests/test_jobs.py::test_purge_raw_payloads - django.core.exceptions.Fiel
 FAILED tests/test_outbox.py::test_dispatch_emits_signal_once - NameError: name 'signals' is not defined
 FAILED tests/test_outbox.py::test_failing_reciever_is_retired_not_lost - NameError: name 'signals' is not defined
 FAILED tests/test_outbox.py::test_late_success_signal - NameError: name 'service' is not defined
-FAILED tests/test_service.py::test_create_is_idempotent_and_initiates_once - AttributeError: module 'django.db.transaction' has no attribute 'on_comit'. Did you mean: 'on_commit'?
-FAILED tests/test_service.py::test_same_key_different_data_conflicts - AttributeError: module 'django.db.transaction' has no attribute 'on_comit'. Did you mean: 'on_commit'?
-FAILED tests/test_service.py::test_open_reference_dedups_double_tap - TypeError: create_payment() got an unexpected keyword argument 'idempotte4ncy_key'. Did you mean 'idempotency_key'?
+FAILED tests/test_service.py::test_create_is_idempotent_and_initiates_once - AttributeError: module 'django.db.transaction' has no attribute 'on_commit'. Did you mean: 'on_commit'?
+FAILED tests/test_service.py::test_same_key_different_data_conflicts - AttributeError: module 'django.db.transaction' has no attribute 'on_commit'. Did you mean: 'on_commit'?
+FAILED tests/test_service.py::test_open_reference_dedups_double_tap - TypeError: create_payment() got an unexpected keyword argument 'idempotency_key'. Did you mean 'idempotency_key'?
 FAILED tests/test_service.py::test_provider_must_be_named_when_ambiguous_or_missing - src.lipahub.core.errors.ConfigurationError: provider 'nope' has no 'adapter' path
-FAILED tests/test_service.py::test_not_called_if_host_transaction_rollsback - AttributeError: module 'django.db.transaction' has no attribute 'on_comit'. Did you mean: 'on_commit'?
+FAILED tests/test_service.py::test_not_called_if_host_transaction_rollsback - AttributeError: module 'django.db.transaction' has no attribute 'on_commit'. Did you mean: 'on_commit'?
 FAILED tests/test_service.py::test_rejected_push_fails_payment - UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
 FAILED tests/test_service.py::test_timeout_leaves_pending_unknown_and_never_retries - UnboundLocalError: cannot access local variable 'Payment' where it is not associated with a value
 FAILED tests/test_service.py::test_transition_writes_audit_and_outbox_together - NameError: name 'status' is not defined

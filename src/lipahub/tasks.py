@@ -9,7 +9,7 @@ if shared_task is not None:
     def initial_payment_task(payment_id):
         from . import service 
 
-        service.initiate_payment(paymrnt_id)
+        service.initiate_payment(payment_id)
 
     @shared_task(name="lipahub.run_job")
     def run_job_task(name):

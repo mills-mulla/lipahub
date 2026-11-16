@@ -18,12 +18,13 @@ DEFAULTS = {
     "RAW_PAYLOAD_RETENTION_DAYS": 30,
     "INBOUND_MERCHANT_ID": 0,
     "OUTBOUND_MERCHANT_ID": 10,
+    "OUTBOX_MAX_ATTEMPTS": 3,
 }
 
 RUNNERS = ("sync", "celery")
 POSITIVE_INTS = (
     "PENDING_POLL_AFTER_SECONDS", "CREATED_REAPER_AFTER_SECONDS", "PAYMENT_EXPIRY_MINUTES",
-    "RAW_PAYLOAD_RETENTION_DAYS", "OUTBOX_MAX_ATTEMPTS",
+    "RAW_PAYLOAD_RETENTION_DAYS",
 )
 MIN_TOKEN_LENGTH = 24
 
@@ -64,7 +65,7 @@ def validate(user_cfg=None):
             if not _is_int(cfg[key]) or cfg[key] < 0:
                 out.append(("error", "lipahub.E003", f"LIPAHUB setting {key!r} must be a positive integer"))
         if not _is_int(cfg["INBOUND_MERCHANT_ID"]) or cfg["INBOUND_MERCHANT_ID"] < 0:
-            out.append(("error", "lipahub.E003", f"LIPAHUB setting INBOUND_MERCHANT_ID must be integers >=0"))
+            out.append(("error", "lipahub.E003", "LIPAHUB setting INBOUND_MERCHANT_ID must be integers >=0"))
         
         providers = cfg["PROVIDERS"]
         if not isinstance(providers, dict):
@@ -72,7 +73,7 @@ def validate(user_cfg=None):
         else:
             for name, pc in providers.items():
                 if not isinstance(pc, dict) or not isinstance(pc.get("adapter"), str):
-                    out.append(("error", "lipahub.E005", f"provider {name!r} adapter must be a string"))
+                    out.append(("error", "lipahub.E003", f"provider {name!r} adapter must be a dotted import string"))
         if not isinstance(cfg["CALLBACK_ALLOWED_IPS"], (list, tuple)):
             out.append(("error", "lipahub.E006", "LIPAHUB.CALLBACK_ALLOWED_IPS must be a list or tuple"))
         prefix = cfg["CALLBACK_PATH_PREFIX"]
